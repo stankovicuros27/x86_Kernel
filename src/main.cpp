@@ -7,8 +7,6 @@ void testList();
 int main(int argc, char* argv[]){
 
     cout << "Starting OS..." << endl;  
-
-    testList();
     
     System::initializeSystem();
 
@@ -21,11 +19,13 @@ int main(int argc, char* argv[]){
     System::restoreSystem();
 
     cout << "Terminating OS..." << endl;
-
-    cout << "ccc";
-    
     return 0;
 }
+
+
+
+
+
 
 void testList(){
     List<int> intList;

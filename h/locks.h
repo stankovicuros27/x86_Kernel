@@ -3,20 +3,16 @@
 
 #include "types.h"
 
-void dispatch(); //for soft lock, to change context after timeout
+void dispatch(); 
 
+extern volatile Word lockVal;
 
-extern Word volatile softLock; //global var 
+#define LOCK              ++lockVal;
+#define UNLOCK            if (--lockVal == 0 && Context::lockTimedOut()) { dispatch(); } // pogledaj jos
+#define LOCKED(block)     LOCK; block; UNLOCK;
 
-
-#define S_LOCK              ++softLock;
-#define S_UNLOCK            if (--softLock == 0 && Context::lockTimedOut()) { dispatch(); } // pogledaj jos
-#define S_LOCKED(izraz)     S_LOCK; izraz; S_UNLOCK;
-
-
-#define H_LOCK              asm { pushf; cli; }
-#define H_UNLOCK            asm { popf; }
-#define H_LOCKED(izraz)     H_LOCK; izraz; H_UNLOCK;
-
+#define DISABLE_INTR                asm { pushf; cli; }
+#define RESTORE_INTR                asm { popf; }
+#define DISABLED_INTR(block)        DISABLE_INTR; block; RESTORE_INTR;
 
 #endif

@@ -1,8 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <stddef.h>
-
 //16bit types
 typedef unsigned    Word;
 typedef unsigned    Reg;

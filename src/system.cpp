@@ -1,11 +1,11 @@
 #include "system.h"
 
 void System::initializeSystem(){
-    IVT::initializeIvt();    
+    Timer::initializeTimerIntr();    
 }
 
 void System::restoreSystem(){
-    IVT::restoreIvt();
+    Timer::restoreTimerIntr();
 }
 
 
