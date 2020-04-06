@@ -2,14 +2,17 @@
 #define SYSTEM_H
 
 #include <iostream.h>
+#include "idlepcb.h"
 #include "timer.h"
-#include "pcb.h"
+
+extern PCB *mainPCB;
+extern PCB *running;
+extern PCB *idlePCB;
 
 class System {
 public:
-    static PCB *running;
-    static void initializeSystem();     //adjust IVT
-    static void restoreSystem();        //restore IVT 
+    static void initializeSystem();     
+    static void restoreSystem();        
 };
 
 #endif

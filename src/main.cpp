@@ -1,6 +1,7 @@
 #include "system.h"
-#include <iostream.h>
+#include "scheduler.h"
 #include "list.h"
+#include <iostream.h>
 
 void testList();
 
@@ -9,6 +10,10 @@ int main(int argc, char* argv[]){
     cout << "Starting OS..." << endl;  
     
     System::initializeSystem();
+
+    PCB *nekiKurac = new PCB(4096, 2, testList);
+    nekiKurac->state = PCB::READY;
+    Scheduler::put(nekiKurac);
 
     for (int i = 0; i < 30000; i++){
         for (int j = 0; j < 30000; j++){

@@ -6,11 +6,10 @@
 #include "thread.h"
 #include <dos.h>
 
-//PSW_I = 1
-#define INIT_PSW 0x0200
 
-//64KB
+#define INIT_PSW 0x0200
 #define MAX_STACK 0x1000
+#define MIN_STACK 0x0100
 
 class PCB {
 public:
@@ -26,11 +25,7 @@ public:
     PCB(StackSize size, Time timeSl, pFunction fp = nullptr); //Treba da povezes sa threadom! preko runWrappera
     ~PCB();
 
-    static void initializeIdlePCB();
-
-
-
-private:
+public: //treba protected, testing
     Thread *myThread;
     StackSize stackSize;
     Word *stack;
@@ -40,10 +35,12 @@ private:
 
     static void runWrapper();
     void initializeStack(pFunction fp);
-    PCB(int kernelMain);
 
     friend class Timer;
     friend class Thread;
+    friend class System;
+
+    PCB(int mainPCB);  //only used by MainPCB
 };
 
 

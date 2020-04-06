@@ -3,15 +3,17 @@
 
 #include "locks.h"
 #include "SCHEDULE.H"
-#include "system.h"
-#include <iostream.h>       //posle obrisi?
+#include "pcb.h"
+#include "idlepcb.h"
 #include <dos.h>
-
+#include <iostream.h>       //posle obrisi?
 
 #define timerEntry 0x08    
 #define utilEntry 0x60  
 
-
+extern PCB *running;
+extern PCB *idlePCB;
+extern PCB *mainPCB;
 
 class Timer{
 public:

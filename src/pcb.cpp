@@ -3,7 +3,8 @@
 PCB::PCB(StackSize size, Time timeSl, void (*fun)()){   
     timeSlice = timeSl;
 
-    if (size > MAX_STACK) size = MAX_STACK - 1; 
+    if (size > MAX_STACK) size = MAX_STACK; 
+    if(size < MIN_STACK) size = MIN_STACK;
     stackSize = size / sizeof(Word); 
     if(fun != nullptr) initializeStack(fun);
 
@@ -21,12 +22,13 @@ void PCB::initializeStack(pFunction fp){
     sp = FP_OFF(stack + stackSize - 12);
 }
 
-PCB::PCB(int kernelMain){
-    state = running; 
+PCB::PCB(int mainPCB){
+    state = PCB::RUNNING; 
     stack = nullptr;
     sp = 0;
     ss = 0;
     bp = 0;
     timeSlice = defaultTimeSlice;
-    
 }
+
+PCB::~PCB(){} //overrajduj

@@ -7,7 +7,7 @@ pInterrupt Timer::oldTimerInterrupt = 0;
 Word tss;
 Word tsp;
 Word tbp;
-volatile Word Timer::remainingTime = 1;
+volatile Time Timer::remainingTime = defaultTimeSlice;
 
 void interrupt Timer::timerIntr(...){
     //tick();
@@ -19,23 +19,23 @@ void interrupt Timer::timerIntr(...){
             mov tsp, sp
             mov tbp, bp
         }
-        System::running->ss = tss;
-        System::running->sp = tsp;
-        System::running->bp = tbp;
+        running->ss = tss;
+        running->sp = tsp;
+        running->bp = tbp;
 
-        if(System::running->state == PCB::RUNNING){
-            Scheduler::put(System::running);
+        if(running->state == PCB::RUNNING){
+            Scheduler::put(running);
         }
-        System::running = Scheduler::get();
+        running = Scheduler::get();
         
-        // if(System::running == nullptr){
-        //     System::running = System::idlePCB;
-        // }
+        if(running == nullptr){
+            running = idlePCB;
+        }
 
-        Timer::remainingTime = System::running->timeSlice;
-        tss = System::running->ss;
-        tsp = System::running->sp;
-        tbp = System::running->bp;
+        Timer::remainingTime = running->timeSlice;
+        tss = running->ss;
+        tsp = running->sp;
+        tbp = running->bp;
         asm {
             mov ss, tss
             mov sp, tsp
