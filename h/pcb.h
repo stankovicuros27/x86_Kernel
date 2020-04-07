@@ -7,14 +7,14 @@
 #include "SCHEDULE.H"
 #include <dos.h>
 #include <iostream.h>
-
+#include "list.h"
 
 #define INIT_PSW 0x0200
 #define MAX_STACK 0x1000
 #define MIN_STACK 0x0100
 
 extern PCB *running;
-extern PCB *mainPCB; //ne treba?
+extern PCB *mainPCB; 
 
 class PCB {
 public:
@@ -27,43 +27,46 @@ public:
         IDLE
     };
 
-    PCB(StackSize size, Time timeSl, Thread *myThr = nullptr, State s = CREATED); //Treba da povezes sa threadom! preko runWrappera
+    //---constructors & destructors---
+    PCB(StackSize size, Time timeSl, Thread *myThr = nullptr, State s = CREATED);
     virtual ~PCB();
 
-    void startPCB();
+    //---getters---
+    Thread *getMyThread() const { return myThread; }
+    StackSize getStackSize() const { return stackSize; }
+    State getState() const { return state; }
+    Time getTimeSlice() const { return timeSlice; }
+    Word getId() const { return myID; }
 
-    Thread *getMyThread() const {
-        return myThread;
-    }
+    //---setters---
+    void setState(State s){ state = s; } //mozda da bacim u private pa da terminate stavljam preko funkcije
 
-    StackSize getStackSize() const {
-        return stackSize;
-    }
-
-    State getState() const {
-        return state;
-    }
-
-    Time getTimeSlice() const {
-        return timeSlice;
-    }
-
-    void setState(State s){
-        state = s;
-    }
 
     //TODO : unlimitedTime, waitToComplete, sleep...
 
+    //---util funcs---
+    void startPCB();
+    void waitToComplete();
+    void awakeMyAsleep();
+
+
 protected: 
-    Thread *myThread;
     StackSize stackSize;
     Word *stack;
     volatile Reg ss, sp, bp;
+
+    Thread *myThread;
+    List<PCB*> waitingForMe;
+
     Time timeSlice;
     PCB::State state;
     Word myLockVal;
 
-    PCB(int mainPCB);  //only used by MainPCB
+    Word myID;
+    static Word currentID;
+
+    PCB(int mainPCB);  
+
     static void runWrapper();
     void initializeStack(pFunction fp);
 

@@ -24,4 +24,8 @@ typedef int     bool;
 
 #define nullptr 0
 
+#define loop for (int jff = 0; jff < 30000; jff++){\
+                for (int kff = 0; kff < 30000; kff++);\
+            }\
+
 #endif

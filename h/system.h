@@ -4,6 +4,7 @@
 #include <iostream.h>
 #include "idlepcb.h"
 #include "timer.h"
+#include <dos.h>
 
 extern PCB *mainPCB;
 extern PCB *running;

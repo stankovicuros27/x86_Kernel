@@ -16,15 +16,14 @@ public:
     void start();
     void waitToComplete();
     virtual ~Thread();
-    ID getId();
-    static ID getRunningId();
+    //ID getId(){ return myPCB->getId(); }
+    //static ID getRunningId(){ return running->getId(); }
     static Thread * getThreadById(ID id);
 
-public: //bilo je protected!
+protected: //bilo je protected!
     friend class PCB;
     Thread (StackSize stackSize = defaultStackSize, Time timeSlice = defaultTimeSlice);
-    virtual void run();
-    //run je bio samo {}
+    virtual void run(){}
 
 private:
     PCB* myPCB;

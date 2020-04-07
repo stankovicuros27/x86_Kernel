@@ -6,6 +6,7 @@
 
 extern volatile bool contextSwitchOnDemand;
 
+//---constructors & destructors---
 Thread::Thread(StackSize stackSize, Time timeSlice) {
     DISABLED_INTR(
         myPCB = new PCB(stackSize, timeSlice, this, PCB::CREATED);
@@ -18,26 +19,13 @@ Thread::~Thread(){
     )
 }
 
-void Thread::start(){
-    myPCB->startPCB();
-}
+
+//---util funcs---
+void Thread::start(){ myPCB->startPCB(); }
+
+void Thread::waitToComplete() { myPCB->waitToComplete(); }
 
 void dispatch(){
     contextSwitchOnDemand = true;
     Timer::timerIntr();
-}
-
-void Thread::run(){
-    int p = 0;
-    LOCKED(
-    for (int k = 0; k < 30; k++){
-        p++;
-
-        cout << "Poz iz runa :" << p << endl;
-        
-        for  (int i = 0; i < 30000; i++)
-            for (int j = 0; j < 30000; j++);
-    }
-    )
-   
 }

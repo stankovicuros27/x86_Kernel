@@ -2,29 +2,29 @@
 #include "scheduler.h"
 #include "list.h"
 #include <iostream.h>
+#include "testthr.h"
 
 int main(int argc, char* argv[]){
 
-    cout << "Starting OS..." << endl;  
-
-    Thread *t1 = new Thread();
-    Thread *t2 = new Thread();
+    TestThread *t1 = new TestThread();
+    TestThread *t2 = new TestThread();
     t1->start();
     t2->start();
 
+    cout << "Starting OS..." << endl;  
     System::initializeSystem();
 
-    for (int i = 0; i < 30; i++){
+    for (int i = 0; i < 3; i++){
         LOCKED(
-            cout << "Main..." << endl;
+            cout << "main() :" << i <<endl;
         )
-        for (int j = 0; j < 30000; j++){
-            for (int k = 0; k < 30000; k++);
-        }
+        loop
     }
+
+    t1->waitToComplete();
+    t2->waitToComplete();
     
     System::restoreSystem();
-
     cout << "Terminating OS..." << endl;
     return 0;
 }
