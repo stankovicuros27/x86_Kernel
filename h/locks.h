@@ -6,9 +6,10 @@
 void dispatch(); 
 
 extern volatile Word lockVal;
+extern volatile Word remainingTime;
 
 #define LOCK              ++lockVal;
-#define UNLOCK            if (--lockVal == 0 && Context::lockTimedOut()) { dispatch(); } // pogledaj jos
+#define UNLOCK            if (--lockVal == 0 && (remainingTime == 0)) { dispatch(); } // pogledaj jos
 #define LOCKED(block)     LOCK; block; UNLOCK;
 
 #define DISABLE_INTR                asm { pushf; cli; }

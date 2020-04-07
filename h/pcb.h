@@ -61,6 +61,7 @@ protected:
     volatile Reg ss, sp, bp;
     Time timeSlice;
     PCB::State state;
+    Word myLockVal;
 
     PCB(int mainPCB);  //only used by MainPCB
     static void runWrapper();

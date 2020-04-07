@@ -6,6 +6,7 @@ PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
     myThread = myThr;
     stack = nullptr;
     ss=sp=bp=0;
+    myLockVal = 0;
 
     if (size > MAX_STACK) size = MAX_STACK; 
     if(size < MIN_STACK) size = MIN_STACK;
@@ -22,6 +23,7 @@ PCB::PCB(int mainPCB){          //used only for creating mainPCB
     ss = 0;
     bp = 0;
     timeSlice = defaultTimeSlice;
+    myLockVal = 0;
 }
 
 PCB::~PCB(){} //overrajduj

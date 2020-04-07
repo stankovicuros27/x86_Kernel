@@ -2,19 +2,19 @@
 
 pInterrupt Timer::oldTimerInterrupt = 0;
 volatile bool contextSwitchOnDemand = false;
+volatile Word remainingTime = defaultTimeSlice;
 
 //void tick();
 volatile Reg tss;
 volatile Reg tsp;
 volatile Reg tbp;
-volatile Time Timer::remainingTime = defaultTimeSlice;
 
 void interrupt Timer::timerIntr(...){
 
     if(contextSwitchOnDemand == false){
 
-        if(Timer::remainingTime > 0)
-            Timer::remainingTime--;  
+        if(remainingTime > 0)
+            remainingTime--;  
 
         //tick();
         asm int utilEntry
@@ -22,7 +22,7 @@ void interrupt Timer::timerIntr(...){
     
 
 
-    if(contextSwitchOnDemand == true || (Timer::remainingTime == 0 && lockVal == 0)){
+    if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0)){
         asm {
             mov tss, ss
             mov tsp, sp
@@ -31,6 +31,7 @@ void interrupt Timer::timerIntr(...){
         running->ss = tss;
         running->sp = tsp;
         running->bp = tbp;
+        running->myLockVal = lockVal;
 
         if(running->state == PCB::RUNNING && running != idlePCB){
             running->state = PCB::READY;
@@ -56,7 +57,8 @@ void interrupt Timer::timerIntr(...){
             cout << "Timer..." << endl;
         )
 
-        Timer::remainingTime = running->timeSlice;
+        lockVal = running->myLockVal;
+        remainingTime = running->timeSlice;
         tss = running->ss;
         tsp = running->sp;
         tbp = running->bp;

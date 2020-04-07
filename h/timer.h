@@ -16,11 +16,11 @@ extern PCB *idlePCB;
 extern PCB *mainPCB;
 
 extern volatile bool contextSwitchOnDemand;
+extern volatile Word remainingTime;
 
 class Timer{
 public:
     static void interrupt timerIntr(...);
-    static volatile Word remainingTime;
     static pInterrupt oldTimerInterrupt;
     static void initializeTimerIntr();
     static void restoreTimerIntr();
