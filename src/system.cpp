@@ -16,6 +16,7 @@ void System::restoreSystem(){
     Timer::restoreTimerIntr();
     delete mainPCB;
     delete idlePCB;
+    delete running;
 }
 
 

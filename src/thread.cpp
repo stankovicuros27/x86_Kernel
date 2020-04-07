@@ -6,24 +6,25 @@
 
 extern volatile bool contextSwitchOnDemand;
 
-//---constructors & destructors---
+//-----constructors & destructors-----
 Thread::Thread(StackSize stackSize, Time timeSlice) {
-    DISABLED_INTR(
+    LOCKED(
         myPCB = new PCB(stackSize, timeSlice, this, PCB::CREATED);
     )
 }
 
-Thread::~Thread(){
-    DISABLED_INTR(
+Thread::~Thread(){          //ovo treba jos nesto?
+    LOCKED(
+        waitToComplete();
         delete myPCB;
     )
 }
 
-
-//---util funcs---
+//-----util funcs-----
 void Thread::start(){ myPCB->startPCB(); }
-
 void Thread::waitToComplete() { myPCB->waitToComplete(); }
+ID Thread::getId(){ return myPCB->getId(); }
+ID Thread::getRunningId(){ return running->getId(); }
 
 void dispatch(){
     contextSwitchOnDemand = true;

@@ -1,23 +1,29 @@
 #include "pcb.h"
+#include "SCHEDULE.H"
+#include <dos.h>
+#include <iostream.h>
 
-Word PCB::currentID = 0;
+ID PCB::currentID = 0;
 
-PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){   
+PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
     timeSlice = timeSl;
     myThread = myThr;
     stack = nullptr;
+    stackSize = 0;
     ss=sp=bp=0;
     myLockVal = 0;    
     myID = ++currentID;
     state = s; 
-
-    if (size > MAX_STACK) size = MAX_STACK; 
-    if(size < MIN_STACK) size = MIN_STACK;
-    stackSize = size / sizeof(Word); 
-    if(myThr != nullptr) initializeStack(runWrapper);
+   
+    if (myThr != nullptr){
+        if (size > MAX_STACK) size = MAX_STACK; 
+        if (size < MIN_STACK) size = MIN_STACK;
+        stackSize = size / sizeof(Word); 
+        initializeStack(runWrapper);
+    } 
 }
 
-PCB::PCB(int mainPCB){           //used only for creating mainPCB
+PCB::PCB(int mainPCB){  //used only for creating mainPCB
     state = PCB::CREATED; 
     stack = nullptr;
     sp = 0;
@@ -28,10 +34,15 @@ PCB::PCB(int mainPCB){           //used only for creating mainPCB
     myID = ++currentID;
 }
 
-PCB::~PCB(){} //overrajduj
+PCB::~PCB(){
+    awakeMyAsleep();
+    if (stackSize != 0) delete[] stack;
+}
 
 void PCB::initializeStack(pFunction fp){
-    stack = new Word[stackSize];
+    LOCKED(
+        stack = new Word[stackSize];
+    )
     stack[stackSize - 1] = INIT_PSW;       
     stack[stackSize - 2] = FP_SEG(fp);
     stack[stackSize - 3] = FP_OFF(fp);
@@ -49,21 +60,12 @@ void PCB::startPCB(){
     )
 }
 
-void PCB::runWrapper(){
-    running->getMyThread()->run();
-    LOCKED(
-        running->awakeMyAsleep();
-        running->setState(PCB::TERMINATED);
-        dispatch();
-    )
-}
-
 void PCB::awakeMyAsleep(){
     LOCKED(
         while(!waitingForMe.isEmpty()){
             PCB *toStart = waitingForMe.getFront();
             waitingForMe.deleteFront();
-            if(!(toStart->getState() == PCB::IDLE || toStart->getState() == PCB::TERMINATED)){
+            if(!(toStart->getState() == PCB::IDLE || toStart->getState() == PCB::TERMINATED)){        
                 toStart->startPCB();
             }
         }
@@ -80,3 +82,11 @@ void PCB::waitToComplete(){
     )
 }
 
+void PCB::runWrapper(){
+    running->getMyThread()->run();
+    LOCKED(
+        running->awakeMyAsleep();
+        running->setState(PCB::TERMINATED);
+        dispatch();
+    )
+}

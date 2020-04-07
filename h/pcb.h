@@ -4,14 +4,7 @@
 #include "locks.h"
 #include "types.h"
 #include "thread.h"
-#include "SCHEDULE.H"
-#include <dos.h>
-#include <iostream.h>
 #include "list.h"
-
-#define INIT_PSW 0x0200
-#define MAX_STACK 0x1000
-#define MIN_STACK 0x0100
 
 extern PCB *running;
 extern PCB *mainPCB; 
@@ -62,10 +55,10 @@ protected:
     PCB::State state;
     Word myLockVal;
 
-    Word myID;
-    static Word currentID;
+    ID myID;
+    static ID currentID;
 
-    PCB(int mainPCB);  
+    PCB(int mainPCB);  //Used only to make mainPCB
 
     static void runWrapper();
     void initializeStack(pFunction fp);

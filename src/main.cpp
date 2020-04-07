@@ -1,6 +1,5 @@
 #include "system.h"
 #include "scheduler.h"
-#include "list.h"
 #include <iostream.h>
 #include "testthr.h"
 

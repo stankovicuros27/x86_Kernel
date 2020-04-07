@@ -2,7 +2,7 @@
 
 pInterrupt Timer::oldTimerInterrupt = 0;
 volatile bool contextSwitchOnDemand = false;
-volatile Word remainingTime = defaultTimeSlice;
+volatile Time remainingTime = defaultTimeSlice;
 
 //void tick();
 volatile Reg tss;

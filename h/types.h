@@ -10,6 +10,11 @@ typedef unsigned long   StackSize;
 typedef unsigned int    Time; // time, x 55ms
 typedef int             ID;
 
+//stack constants
+#define INIT_PSW 0x0200
+#define MAX_STACK 0x1000
+#define MIN_STACK 0x0100
+
 //interrupt routine pointer
 typedef void interrupt  (*pInterrupt)(...);
 typedef unsigned char   ivtEntry;

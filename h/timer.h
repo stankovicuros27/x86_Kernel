@@ -16,7 +16,7 @@ extern PCB *idlePCB;
 extern PCB *mainPCB;
 
 extern volatile bool contextSwitchOnDemand;
-extern volatile Word remainingTime;
+extern volatile Time remainingTime;
 
 class Timer{
 public:
