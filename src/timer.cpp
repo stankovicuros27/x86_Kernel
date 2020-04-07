@@ -1,19 +1,28 @@
 #include "timer.h"
 
 pInterrupt Timer::oldTimerInterrupt = 0;
+volatile bool contextSwitchOnDemand = false;
 
-// --- New timer interrupt ---
 //void tick();
-Word tss;
-Word tsp;
-Word tbp;
+volatile Reg tss;
+volatile Reg tsp;
+volatile Reg tbp;
 volatile Time Timer::remainingTime = defaultTimeSlice;
 
 void interrupt Timer::timerIntr(...){
-    //tick();
-    asm int utilEntry
 
-    if(--Timer::remainingTime == 0){
+    if(contextSwitchOnDemand == false){
+
+        if(Timer::remainingTime > 0)
+            Timer::remainingTime--;  
+
+        //tick();
+        asm int utilEntry
+    }
+    
+
+
+    if(contextSwitchOnDemand == true || (Timer::remainingTime == 0 && lockVal == 0)){
         asm {
             mov tss, ss
             mov tsp, sp
@@ -23,14 +32,29 @@ void interrupt Timer::timerIntr(...){
         running->sp = tsp;
         running->bp = tbp;
 
-        if(running->state == PCB::RUNNING){
+        if(running->state == PCB::RUNNING && running != idlePCB){
+            running->state = PCB::READY;
             Scheduler::put(running);
         }
+
         running = Scheduler::get();
         
-        if(running == nullptr){
+        // if(running == nullptr){
+        //     running = idlePCB;
+        // }
+        // else {
+        //     running->state = PCB::RUNNING;
+        // }
+
+        if(running == nullptr || running->state != PCB::READY){
             running = idlePCB;
+        } else {
+            running->state = PCB::RUNNING;
         }
+
+        DISABLED_INTR(
+            cout << "Timer..." << endl;
+        )
 
         Timer::remainingTime = running->timeSlice;
         tss = running->ss;
@@ -42,13 +66,14 @@ void interrupt Timer::timerIntr(...){
             mov bp, tbp
         }
     }
+    contextSwitchOnDemand = false;
 }
 
 void Timer::initializeTimerIntr(){
     DISABLED_INTR(
         Timer::oldTimerInterrupt = getvect(timerEntry);
         setvect(utilEntry, Timer::oldTimerInterrupt);
-        setvect(timerEntry, timerIntr);
+        setvect(timerEntry, Timer::timerIntr);
     )
 }
 

@@ -4,16 +4,21 @@
 #include "locks.h"
 #include "types.h"
 #include "thread.h"
+#include "SCHEDULE.H"
 #include <dos.h>
+#include <iostream.h>
 
 
 #define INIT_PSW 0x0200
 #define MAX_STACK 0x1000
 #define MIN_STACK 0x0100
 
+extern PCB *running;
+extern PCB *mainPCB; //ne treba?
+
 class PCB {
 public:
-    enum state {
+    enum State {
         CREATED,
         READY,
         RUNNING,
@@ -22,25 +27,48 @@ public:
         IDLE
     };
 
-    PCB(StackSize size, Time timeSl, pFunction fp = nullptr); //Treba da povezes sa threadom! preko runWrappera
-    ~PCB();
+    PCB(StackSize size, Time timeSl, Thread *myThr = nullptr, State s = CREATED); //Treba da povezes sa threadom! preko runWrappera
+    virtual ~PCB();
 
-public: //treba protected, testing
+    void startPCB();
+
+    Thread *getMyThread() const {
+        return myThread;
+    }
+
+    StackSize getStackSize() const {
+        return stackSize;
+    }
+
+    State getState() const {
+        return state;
+    }
+
+    Time getTimeSlice() const {
+        return timeSlice;
+    }
+
+    void setState(State s){
+        state = s;
+    }
+
+    //TODO : unlimitedTime, waitToComplete, sleep...
+
+protected: 
     Thread *myThread;
     StackSize stackSize;
     Word *stack;
     volatile Reg ss, sp, bp;
     Time timeSlice;
-    PCB::state state;
+    PCB::State state;
 
+    PCB(int mainPCB);  //only used by MainPCB
     static void runWrapper();
     void initializeStack(pFunction fp);
 
     friend class Timer;
     friend class Thread;
     friend class System;
-
-    PCB(int mainPCB);  //only used by MainPCB
 };
 
 

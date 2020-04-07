@@ -20,14 +20,16 @@ public:
     static ID getRunningId();
     static Thread * getThreadById(ID id);
 
-protected:
+public: //bilo je protected!
     friend class PCB;
     Thread (StackSize stackSize = defaultStackSize, Time timeSlice = defaultTimeSlice);
-    virtual void run() {}
+    virtual void run();
+    //run je bio samo {}
 
 private:
     PCB* myPCB;
 };
 
 void dispatch ();
+
 #endif

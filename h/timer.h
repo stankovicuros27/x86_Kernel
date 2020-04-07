@@ -15,6 +15,8 @@ extern PCB *running;
 extern PCB *idlePCB;
 extern PCB *mainPCB;
 
+extern volatile bool contextSwitchOnDemand;
+
 class Timer{
 public:
     static void interrupt timerIntr(...);
