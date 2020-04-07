@@ -9,6 +9,8 @@
 extern PCB *running;
 extern PCB *mainPCB; 
 
+extern List<PCB*> allPCBs;
+
 class PCB {
 public:
     enum State {
@@ -40,8 +42,8 @@ public:
     //---util funcs---
     void startPCB();
     void waitToComplete();
+    void waitAll();
     void awakeMyAsleep();
-
 
 protected: 
     StackSize stackSize;

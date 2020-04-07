@@ -125,7 +125,7 @@ public:
         clear();
     }
     
-private:
+public: //bilo je private
 
     int n;
     Elem *head, *tail;

@@ -19,9 +19,6 @@ int main(int argc, char* argv[]){
         )
         loop
     }
-
-    t1->waitToComplete();
-    t2->waitToComplete();
     
     System::restoreSystem();
     cout << "Terminating OS..." << endl;

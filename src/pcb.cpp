@@ -4,6 +4,7 @@
 #include <iostream.h>
 
 ID PCB::currentID = 0;
+List<PCB*> allPCBs;
 
 PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
     timeSlice = timeSl;
@@ -21,6 +22,7 @@ PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
         stackSize = size / sizeof(Word); 
         initializeStack(runWrapper);
     } 
+    allPCBs.insertBack(this);
 }
 
 PCB::PCB(int mainPCB){  //used only for creating mainPCB
@@ -32,11 +34,13 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
     timeSlice = defaultTimeSlice;
     myLockVal = 0;
     myID = ++currentID;
+    allPCBs.insertBack(this);
 }
 
 PCB::~PCB(){
     awakeMyAsleep();
     if (stackSize != 0) delete[] stack;
+    stack = nullptr;
 }
 
 void PCB::initializeStack(pFunction fp){
@@ -78,6 +82,18 @@ void PCB::waitToComplete(){
             running->state = PCB::BLOCKED;
             waitingForMe.insertBack(running);
             dispatch();
+        }
+    )
+}
+
+void PCB::waitAll(){
+    LOCKED(
+        while(allPCBs.size() != 0){
+            PCB *toWait = allPCBs.getFront();
+            if (toWait->state != PCB::IDLE && toWait->state != PCB::TERMINATED){
+                toWait->waitToComplete();
+            }
+            allPCBs.deleteFront();
         }
     )
 }

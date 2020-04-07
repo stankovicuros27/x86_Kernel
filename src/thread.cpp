@@ -26,6 +26,18 @@ void Thread::waitToComplete() { myPCB->waitToComplete(); }
 ID Thread::getId(){ return myPCB->getId(); }
 ID Thread::getRunningId(){ return running->getId(); }
 
+Thread* Thread::getThreadById(ID id){
+    Thread *ret = nullptr;
+    List<PCB*>::Elem *iter = allPCBs.head;
+    while(iter != nullptr){
+        if (iter->data->getId() == id){
+            return iter->data->getMyThread();
+        }
+        iter = iter->next;
+    }
+    return nullptr;
+}
+
 void dispatch(){
     contextSwitchOnDemand = true;
     Timer::timerIntr();
