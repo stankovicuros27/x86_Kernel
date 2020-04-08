@@ -1,7 +1,15 @@
 #include "idlepcb.h"
 
-IdlePCB::IdlePCB() : PCB(0, 1){
+IdlePCB::IdlePCB() : PCB(){
     setState(PCB::IDLE);
+    stack = nullptr;
+    sp = 0;
+    ss = 0;
+    bp = 0;
+    unlimitedTime = 0;
+    timeSlice = 1;
+    myLockVal = 0;
+    stackSize = 256;
     initializeStack(idleVoid);
 }
 

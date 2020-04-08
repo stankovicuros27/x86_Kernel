@@ -39,6 +39,8 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
     allPCBs.insertBack(this);
 }
 
+PCB::PCB(){} //used only to make idlePCB
+
 PCB::~PCB(){
     awakeMyAsleep();
     if (stackSize != 0) delete[] stack;
@@ -79,7 +81,7 @@ void PCB::awakeMyAsleep(){
 void PCB::waitToComplete(){
     //pazi ovde uslove!!!
     LOCKED(
-        if(this != nullptr && running != this && this->state == PCB::READY){        
+        if(this != nullptr && running != this && this->state != PCB::TERMINATED && this->state != PCB::IDLE){        
             running->state = PCB::BLOCKED;
             this->waitingForMe.insertBack(running);
             dispatch();

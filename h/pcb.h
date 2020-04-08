@@ -65,7 +65,8 @@ protected:
     ID myID;
     static ID currentID;
 
-    PCB(int mainPCB);  //Used only to make mainPCB
+    PCB(int mainPCB);   //Used only to make mainPCB
+    PCB();              //Used only to make idlePCB
 
     static void runWrapper();
     void initializeStack(pFunction fp);

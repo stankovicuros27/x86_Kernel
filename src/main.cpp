@@ -10,18 +10,17 @@ int main(int argc, char* argv[]){
     cout << "Starting OS..." << endl;  
     System::initializeSystem();
 
-    userMain(argc, argv);
-    //UserThread *user = new UserThread(argc, argv);
-    //user->start();
+    //userMain(argc, argv);
+    UserThread *user = new UserThread(argc, argv);
+    user->start();
+    delete user;
 
     for (int i = 0; i < 3; i++){
         LOCKED(
-            cout << "main() state:" << mainPCB->getState() <<endl;
+            cout << "main..." <<endl;
         )
         loop;
     }
-
-    //delete user;
 
     System::restoreSystem();
     cout << "Terminating OS..." << endl;

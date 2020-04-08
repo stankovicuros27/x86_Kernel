@@ -5,19 +5,17 @@ PCB *running = nullptr;
 PCB *idlePCB = nullptr;
 
 void System::initializeSystem(){
-    mainPCB = new PCB(0);   //int constructor used for main pcb
-    mainPCB->startPCB();
-    running = mainPCB;
+    mainPCB = new PCB(0);       //int constructor used for main pcb
+    running = mainPCB;          //don't start mainPCB!! already in scheduler!
     idlePCB = new IdlePCB();
     Timer::initializeTimerIntr();    
 }
 
 void System::restoreSystem(){
-    mainPCB->waitAll();
+    //mainPCB->waitAll();
     Timer::restoreTimerIntr();
-    //delete mainPCB;
-    //delete idlePCB;
-    // delete running;
+    delete mainPCB;
+    delete idlePCB;
 }
 
 

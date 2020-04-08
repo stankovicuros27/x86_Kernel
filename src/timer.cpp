@@ -34,20 +34,13 @@ void interrupt Timer::timerIntr(...){
         running->sp = tsp;
         running->bp = tbp;
         running->myLockVal = lockVal;
-
-        if(running->state == PCB::RUNNING && running != idlePCB){
+        
+        if(running->state == PCB::RUNNING){
             running->state = PCB::READY;
             Scheduler::put(running);
         }
 
         running = Scheduler::get();
-        
-        // if(running == nullptr){
-        //     running = idlePCB;
-        // }
-        // else {
-        //     running->state = PCB::RUNNING;
-        // }
 
         if(running == nullptr || running->state != PCB::READY){
             running = idlePCB;
@@ -55,9 +48,7 @@ void interrupt Timer::timerIntr(...){
             running->state = PCB::RUNNING;
         }
 
-        DISABLED_INTR(
-            cout << "Timer Context Switch..." << endl;
-        )
+        //cout << "Timer Context Switch..." << endl;
 
         lockVal = running->myLockVal;
         remainingTime = running->timeSlice;
