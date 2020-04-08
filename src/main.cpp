@@ -7,22 +7,18 @@ int userMain(int argc, char* argv[]);
 
 int main(int argc, char* argv[]){
 
-    cout << "Starting OS..." << endl;  
+    cout << endl << "Starting OS..." << endl;  
     System::initializeSystem();
 
-    //userMain(argc, argv);
-    UserThread *user = new UserThread(argc, argv);
-    user->start();
-    delete user;
-
-    for (int i = 0; i < 3; i++){
-        LOCKED(
-            cout << "main..." <<endl;
-        )
-        loop;
-    }
+    UserThread *userThr = new UserThread(argc, argv);
+    userThr->start();
+    userThr->waitToComplete();
+    int ret = userThr->retVal();
 
     System::restoreSystem();
+    cout << endl << "Finished userMain(), return code: " << ret << endl;
     cout << "Terminating OS..." << endl;
+
+    delete userThr;
     return 0;
 }

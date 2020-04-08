@@ -11,17 +11,11 @@ volatile Reg tbp;
 
 void interrupt Timer::timerIntr(...){
 
+
     if(contextSwitchOnDemand == false){
-
-        if(remainingTime > 0)
-            remainingTime--;  
-        
-        // DISABLED_INTR(
-        //     cout << "Timer tick..." << endl;
-        // )
-
-        //tick();
+        if(remainingTime > 0) remainingTime--;  
         asm int utilEntry
+        //tick();
     }
     
     if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0 && !running->getUnlimitedTime())){
@@ -47,8 +41,6 @@ void interrupt Timer::timerIntr(...){
         } else {
             running->state = PCB::RUNNING;
         }
-
-        //cout << "Timer Context Switch..." << endl;
 
         lockVal = running->myLockVal;
         remainingTime = running->timeSlice;

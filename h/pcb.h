@@ -23,7 +23,7 @@ public:
     };
 
     //---constructors & destructors---
-    PCB(StackSize size, Time timeSl, Thread *myThr = nullptr, State s = CREATED);
+    PCB(StackSize size, Time timeSl, Thread *myThr, State s = CREATED);
     virtual ~PCB();
 
     //---getters---
@@ -32,20 +32,14 @@ public:
     State getState() const { return state; }
     Time getTimeSlice() const { return timeSlice; }
     Word getId() const { return myID; }
-    bool getUnlimitedTime() const { return unlimitedTime; }
+    bool getUnlimitedTime() const { return timeSlice == 0; }
 
     //---setters---
-    void setState(State s){ state = s; } //mozda da bacim u private pa da terminate stavljam preko funkcije
-
-
-    //TODO : unlimitedTime, waitToComplete, sleep...
+    void setState(State s){ state = s; }
 
     //---util funcs---
     void startPCB();
     void waitToComplete();
-    void waitAll();
-    void killAll();
-    void awakeMyAsleep();
 
     static PCB* getPCBById(ID id);
 
@@ -58,7 +52,6 @@ protected:
     List<PCB*> waitingForMe;
 
     Time timeSlice;
-    bool unlimitedTime;
     PCB::State state;
     Word myLockVal;
 
@@ -68,9 +61,14 @@ protected:
     PCB(int mainPCB);   //Used only to make mainPCB
     PCB();              //Used only to make idlePCB
 
-    static void runWrapper();
     void initializeStack(pFunction fp);
+    static void runWrapper();
 
+private:  
+    void awakeMyAsleep();
+    bool isWaitingForMe();
+    void waitAll();
+    
     friend class Timer;
     friend class Thread;
     friend class System;

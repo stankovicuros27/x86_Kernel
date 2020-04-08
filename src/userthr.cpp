@@ -1,6 +1,5 @@
 #include "userthr.h"
 
-
 int userMain(int argc, char* argv[]);
 
 UserThread::UserThread(int argcx, char** argvx){

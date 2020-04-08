@@ -26,11 +26,11 @@ void Thread::waitToComplete() { LOCKED(myPCB->waitToComplete();) }
 ID Thread::getId(){ return myPCB->getId(); }
 ID Thread::getRunningId(){ return running->getId(); }
 
-Thread* Thread::getThreadById(ID id){
-    return PCB::getPCBById(id)->getMyThread();
-}
+Thread* Thread::getThreadById(ID id){ return PCB::getPCBById(id)->getMyThread(); }
 
 void dispatch(){
-    contextSwitchOnDemand = true;
-    Timer::timerIntr();
+    DISABLED_INTR(
+        contextSwitchOnDemand = true;
+        Timer::timerIntr();
+    )
 }

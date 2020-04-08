@@ -6,7 +6,7 @@
 #include "pcb.h"
 #include "idlepcb.h"
 #include <dos.h>
-#include <iostream.h>       //posle obrisi?
+#include <iostream.h>       
 
 #define timerEntry 0x08    
 #define utilEntry 0x60  
