@@ -16,9 +16,9 @@ void interrupt Timer::timerIntr(...){
         if(remainingTime > 0)
             remainingTime--;  
         
-        DISABLED_INTR(
-            cout << "Timer tick..." << endl;
-        )
+        // DISABLED_INTR(
+        //     cout << "Timer tick..." << endl;
+        // )
 
         //tick();
         asm int utilEntry

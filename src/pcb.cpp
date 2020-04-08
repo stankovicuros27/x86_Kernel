@@ -27,7 +27,7 @@ PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
 }
 
 PCB::PCB(int mainPCB){  //used only for creating mainPCB
-    state = PCB::CREATED; 
+    state = PCB::RUNNING; 
     stack = nullptr;
     sp = 0;
     ss = 0;
@@ -59,8 +59,8 @@ void PCB::initializeStack(pFunction fp){
 
 void PCB::startPCB(){
     LOCKED(
-        if (this != nullptr && state == PCB::CREATED || state == PCB::BLOCKED){
-            state = PCB::READY;
+        if (this != nullptr && (state == PCB::CREATED || state == PCB::BLOCKED)){
+            setState(PCB::READY);
             Scheduler::put(this);
         } 
     )

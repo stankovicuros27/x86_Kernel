@@ -13,10 +13,10 @@ void System::initializeSystem(){
 }
 
 void System::restoreSystem(){
-    //mainPCB->waitAll();
+    mainPCB->waitAll();
     Timer::restoreTimerIntr();
-    delete mainPCB;
-    delete idlePCB;
+    //delete mainPCB;
+    //delete idlePCB;
     // delete running;
 }
 
