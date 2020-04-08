@@ -7,6 +7,7 @@ ID PCB::currentID = 0;
 List<PCB*> allPCBs;
 
 PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
+    unlimitedTime = (timeSl == 0);
     timeSlice = timeSl;
     myThread = myThr;
     stack = nullptr;
@@ -31,6 +32,7 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
     sp = 0;
     ss = 0;
     bp = 0;
+    unlimitedTime = 0;
     timeSlice = defaultTimeSlice;
     myLockVal = 0;
     myID = ++currentID;
@@ -57,7 +59,7 @@ void PCB::initializeStack(pFunction fp){
 
 void PCB::startPCB(){
     LOCKED(
-        if (state != PCB::IDLE){
+        if (this != nullptr && state == PCB::CREATED || state == PCB::BLOCKED){
             state = PCB::READY;
             Scheduler::put(this);
         } 
@@ -69,32 +71,52 @@ void PCB::awakeMyAsleep(){
         while(!waitingForMe.isEmpty()){
             PCB *toStart = waitingForMe.getFront();
             waitingForMe.deleteFront();
-            if(!(toStart->getState() == PCB::IDLE || toStart->getState() == PCB::TERMINATED)){        
-                toStart->startPCB();
-            }
+            if(toStart != nullptr) toStart->startPCB();
         }
     )
 }
 
 void PCB::waitToComplete(){
+    //pazi ovde uslove!!!
     LOCKED(
-        if(running != this && running->state != PCB::IDLE && state != PCB::TERMINATED){
+        if(this != nullptr && running != this && this->state == PCB::READY){        
             running->state = PCB::BLOCKED;
-            waitingForMe.insertBack(running);
+            this->waitingForMe.insertBack(running);
             dispatch();
         }
     )
 }
 
 void PCB::waitAll(){
+    if(running != mainPCB) return;  //only mainPCB can wait for all other threads
     LOCKED(
-        while(allPCBs.size() != 0){
-            PCB *toWait = allPCBs.getFront();
-            if (toWait->state != PCB::IDLE && toWait->state != PCB::TERMINATED){
+        List<PCB*>::Elem *iter;
+        while(iter != nullptr){
+            PCB *toWait = iter->data;
+            if (toWait->state != PCB::IDLE && toWait->state != PCB::TERMINATED && toWait->state != PCB::CREATED){
                 toWait->waitToComplete();
             }
-            allPCBs.deleteFront();
+            iter = iter->next;
         }
+    )
+}
+
+PCB* PCB::getPCBById(ID id){
+    List<PCB*>::Elem *iter = allPCBs.head;
+    while(iter != nullptr){
+        if (iter->data->getId() == id){
+            return iter->data;
+        }
+        iter = iter->next;
+    }
+    return nullptr;
+}
+
+//TODO
+void PCB::killAll(){
+    if(running != mainPCB) return;  //only mainPCB can kill all other threads
+    LOCKED(
+        
     )
 }
 
@@ -103,6 +125,9 @@ void PCB::runWrapper(){
     LOCKED(
         running->awakeMyAsleep();
         running->setState(PCB::TERMINATED);
+        DISABLED_INTR(
+            cout << "Gotova nit!" << endl;
+        )
         dispatch();
     )
 }

@@ -15,14 +15,16 @@ void interrupt Timer::timerIntr(...){
 
         if(remainingTime > 0)
             remainingTime--;  
+        
+        DISABLED_INTR(
+            cout << "Timer tick..." << endl;
+        )
 
         //tick();
         asm int utilEntry
     }
     
-
-
-    if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0)){
+    if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0 && !running->getUnlimitedTime())){
         asm {
             mov tss, ss
             mov tsp, sp
@@ -54,7 +56,7 @@ void interrupt Timer::timerIntr(...){
         }
 
         DISABLED_INTR(
-            cout << "Timer..." << endl;
+            cout << "Timer Context Switch..." << endl;
         )
 
         lockVal = running->myLockVal;

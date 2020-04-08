@@ -32,6 +32,7 @@ public:
     State getState() const { return state; }
     Time getTimeSlice() const { return timeSlice; }
     Word getId() const { return myID; }
+    bool getUnlimitedTime() const { return unlimitedTime; }
 
     //---setters---
     void setState(State s){ state = s; } //mozda da bacim u private pa da terminate stavljam preko funkcije
@@ -43,7 +44,10 @@ public:
     void startPCB();
     void waitToComplete();
     void waitAll();
+    void killAll();
     void awakeMyAsleep();
+
+    static PCB* getPCBById(ID id);
 
 protected: 
     StackSize stackSize;
@@ -54,6 +58,7 @@ protected:
     List<PCB*> waitingForMe;
 
     Time timeSlice;
+    bool unlimitedTime;
     PCB::State state;
     Word myLockVal;
 

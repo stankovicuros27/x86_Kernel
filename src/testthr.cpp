@@ -1,10 +1,12 @@
-#include "testthr.h"
+// #include "testthr.h"
 
-void TestThread::run(){
-    for (int i = 0; i < 30; i++){
-        LOCKED(
-            cout << "TestThread run() : " << i << endl;
-        )
-        loop;
-    }
-}
+// TestThread::TestThread(StackSize stackSize, Time timeSlice) : Thread(stackSize, timeSlice){}
+
+// void TestThread::run(){
+//     for (int i = 0; i < 10; i++){
+//         LOCKED(
+//             cout << "TestThread run() : " << i << endl;
+//         )
+//         loop;
+//     }
+// }
