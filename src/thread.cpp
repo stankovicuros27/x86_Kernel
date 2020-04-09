@@ -31,6 +31,8 @@ Thread* Thread::getThreadById(ID id){ return PCB::getPCBById(id)->getMyThread();
 void dispatch(){
     DISABLED_INTR(
         contextSwitchOnDemand = true;
-        Timer::timerIntr();
+        asm int timerEntry
     )
+        //Timer::timerIntr(); u disableintr
+
 }

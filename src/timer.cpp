@@ -15,7 +15,6 @@ void interrupt Timer::timerIntr(...){
     if(contextSwitchOnDemand == false){
         if(remainingTime > 0) remainingTime--;  
         asm int utilEntry
-        //tick();
     }
     
     if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0 && !running->getUnlimitedTime())){
