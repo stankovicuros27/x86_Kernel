@@ -10,7 +10,7 @@ KernelSemaphore::KernelSemaphore(int init){
     )
 }
 
-KernelSemaphore::~KernelSemaphore(){} //TODO
+KernelSemaphore::~KernelSemaphore(){} //TODO?
 
 int KernelSemaphore::wait(Time maxTimeToWait){
     if(maxTimeToWait < 0) return -1;
@@ -33,12 +33,10 @@ int KernelSemaphore::wait(Time maxTimeToWait){
     return ret; 
 }
 
-
 int KernelSemaphore::signal(int n){
     if(n < 0) return n;
     int incVal = (n == 0) ? 1 : n;
     int ret = 0;
-
     LOCKED(
         val += incVal;
         unblockPCBs(incVal);
@@ -60,7 +58,9 @@ void KernelSemaphore::unblockPCBs(int &n){
         }
         while(n > 0 && !blockedWithTime.isEmpty()){
             PCB *toUnblock = blockedWithTime.getFront()->myPCB;
+            Time addWaitTime = blockedWithTime.getFront()->timeToWait;
             blockedWithTime.deleteFront();
+            blockedWithTime.getFront()->timeToWait += addWaitTime;
             toUnblock->setState(PCB::READY);
             Scheduler::put(toUnblock);
             toUnblock->manuallyUnblocked = 1;
@@ -84,8 +84,8 @@ void KernelSemaphore::insertTimePCB(semPCB *toInsert){
 void KernelSemaphore::tickSem(){
     if(blockedWithTime.isEmpty()) return;
     LOCKED(
-        if(--(blockedWithTime.getFront()->timeToWait) == 0){
-            while(!blockedWithTime.isEmpty() && blockedWithTime.getFront()->timeToWait == 0){
+        if(--(blockedWithTime.getFront()->timeToWait) <= 0){
+            while(!blockedWithTime.isEmpty() && blockedWithTime.getFront()->timeToWait <= 0){
                 PCB *toUnblock = blockedWithTime.getFront()->myPCB;
                 blockedWithTime.deleteFront();
                 toUnblock->setState(PCB::READY);
@@ -106,9 +106,3 @@ void KernelSemaphore::tickAllSems(){
         }
     )
 }
-
-
-
-
-
-

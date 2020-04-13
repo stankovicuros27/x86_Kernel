@@ -12,7 +12,6 @@ volatile Reg tbp;
 
 void interrupt Timer::timerIntr(...){
 
-
     if(contextSwitchOnDemand == false){
         if(remainingTime > 0) remainingTime--;  
         asm int utilEntry
