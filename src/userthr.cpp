@@ -8,6 +8,10 @@ UserThread::UserThread(int argcx, char** argvx){
     retUserMain = 0;
 }
 
+UserThread::~UserThread(){
+    waitToComplete();
+}
+
 void UserThread::run(){
     retUserMain = userMain(argc, argv);
 }

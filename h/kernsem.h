@@ -3,9 +3,10 @@
 
 #include "locks.h"
 #include "types.h"
-#include "semaphor.h"
-#include "pcb.h"
 #include "list.h"
+
+class KernelSemaphore;
+class PCB;
 
 extern List<KernelSemaphore*> allKernelSemaphores;
 
@@ -15,18 +16,26 @@ public:
         PCB *myPCB; 
         Time timeToWait;
         semPCB(PCB *myPCB, Time timeToWait) : myPCB(myPCB) , timeToWait(timeToWait) {}
-    }
+    };
 
     KernelSemaphore(int init);
-    ~KernelSem();
+    ~KernelSemaphore();
 
     int wait(Time maxTimeToWait);
     int signal(int n);
-    int val() const { return value; }
+    int getVal() const { return val; }
 
 private:
     int val;
-    List<semPCB*> blocked;
-}
+    List<semPCB*> blockedWithTime;
+    List<PCB*> blockedInfTime;
+
+    void insertTimePCB(semPCB *toInsert);
+    void unblockPCBs(int &n);
+    void tickSem();
+    static void tickAllSems();
+
+    friend class Timer;
+};
 
 #endif

@@ -79,8 +79,8 @@ void PCB::waitToComplete(){
         running != this && 
         this->state != PCB::TERMINATED && 
         this->state != PCB::IDLE && 
-        this->state != PCB::CREATED &&
-        (!this->isWaitingForMe() && !allowDeadLock))
+        this->state != PCB::CREATED 
+        /*&& !this->isWaitingForMe()*/ ) /* used for deadlocks */
         {        
             running->state = PCB::BLOCKED;
             this->waitingForMe.insertBack(running);
@@ -92,14 +92,15 @@ void PCB::waitToComplete(){
 //pozivam iz runninga za thread za koji zelim da vidim da li me ceka
 bool PCB::isWaitingForMe(){
     bool ret = false;
-    List<PCB*>::Elem *iter = running->waitingForMe.head;
-    while(iter != nullptr){
-        if (iter->data->getId() == this->getId()){
-            ret = true;
-            break;
+    LOCKED(
+        List<PCB*>::Iterator iter = running->waitingForMe.begin();
+        for(;iter != running->waitingForMe.end(); iter++){
+            if ((*iter)->getId() == this->getId()){
+                ret = true;
+                break;
+            }
         }
-        iter = iter->next;
-    }
+    )
     return ret;
 }
 
@@ -107,22 +108,17 @@ void PCB::waitAll(){
     //pazi ovde uslove!!!!!!
     if(running != mainPCB) return;  //only mainPCB can wait for all other threads
     LOCKED(
-        List<PCB*>::Elem *iter;
-        iter = allPCBs.head;
-        while(iter != nullptr){
-            iter->data->waitToComplete();
-            iter = iter->next;
+        List<PCB*>::Iterator iter = allPCBs.begin();
+        for(;iter != allPCBs.end(); iter++){
+            (*iter)->waitToComplete();
         }
     )
 }
 
 PCB* PCB::getPCBById(ID id){
-    List<PCB*>::Elem *iter = allPCBs.head;
-    while(iter != nullptr){
-        if (iter->data->getId() == id){
-            return iter->data;
-        }
-        iter = iter->next;
+    List<PCB*>::Iterator iter = allPCBs.begin();
+    for(;iter != allPCBs.end(); iter++){
+        if ((*iter)->getId() == id) return (*iter);
     }
     return nullptr;
 }

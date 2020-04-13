@@ -55,6 +55,8 @@ protected:
     PCB::State state;
     Word myLockVal;
 
+    bool manuallyUnblocked;
+
     ID myID;
     static ID currentID;
 
@@ -72,6 +74,7 @@ private:
     friend class Timer;
     friend class Thread;
     friend class System;
+    friend class KernelSemaphore;
 };
 
 

@@ -9,6 +9,7 @@
 class UserThread : public Thread {
 public:
     UserThread(int argcx, char** argvx);
+    ~UserThread();
     int retVal(){ return retUserMain; }
 protected:
     void run();

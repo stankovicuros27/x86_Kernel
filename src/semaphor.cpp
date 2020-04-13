@@ -1,5 +1,7 @@
 #include "semaphor.h"
 #include "kernsem.h"
+#include "types.h"
+#include "locks.h"
 
 Semaphore::Semaphore(int init){
     LOCKED(
@@ -11,12 +13,13 @@ Semaphore::~Semaphore(){
     LOCKED(
         if(myImpl != nullptr){
             delete myImpl;
+            myImpl = nullptr;
         }
     )
 }
 
 int Semaphore::wait(Time maxTimeToWait){
-    int ret = myImpl->maxTimeToWait();
+    int ret = myImpl->wait(maxTimeToWait);
     return ret;
 }
 
@@ -26,6 +29,6 @@ int Semaphore::signal(int n) {
 }
 
 int Semaphore::val() const {
-    ret = myImpl->val();
+    int ret = myImpl->getVal();
     return ret;
 }

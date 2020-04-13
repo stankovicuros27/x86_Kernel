@@ -12,7 +12,7 @@ void System::initializeSystem(){
 }
 
 void System::restoreSystem(){
-    if (waitAllThreads) mainPCB->waitAll();
+    //mainPCB->waitAll();
     Timer::restoreTimerIntr();
     delete mainPCB;
     delete idlePCB;
