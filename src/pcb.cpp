@@ -37,7 +37,7 @@ PCB::PCB(){} //used only to make idlePCB
 
 PCB::~PCB(){                        //mozda da dodam da se brise iz liste svih PCBova?
     awakeMyAsleep();
-    if (stackSize != 0) delete[] stack;
+    if (stackSize != 0 || stack != nullptr) delete[] stack;
 }
 
 void PCB::initializeStack(pFunction fp){

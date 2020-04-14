@@ -4,6 +4,7 @@
 pInterrupt Timer::oldTimerInterrupt = 0;
 volatile bool contextSwitchOnDemand = false;
 volatile Time remainingTime = defaultTimeSlice;
+volatile Word lockVal = 0;
 
 void tick();
 volatile Reg tss;

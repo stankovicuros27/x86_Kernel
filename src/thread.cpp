@@ -17,6 +17,7 @@ Thread::~Thread(){          //ovo treba jos nesto?
     LOCKED(
         this->waitToComplete();
         delete myPCB;
+        myPCB = nullptr;
     )
 }
 
@@ -34,5 +35,4 @@ void dispatch(){
         asm int timerEntry
     )
         //Timer::timerIntr(); u disableintr
-
 }

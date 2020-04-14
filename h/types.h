@@ -33,4 +33,6 @@ typedef int     bool;
                 for (int kff = 0; kff < 32000; kff++);\
             }\
 
+#define shortloop for(int fff = 0; fff < 32000; fff++);
+
 #endif

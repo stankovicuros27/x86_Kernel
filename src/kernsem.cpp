@@ -4,28 +4,40 @@
 List<KernelSemaphore*> allKernelSemaphores;
 
 KernelSemaphore::KernelSemaphore(int init){
-    val = (init > 0 ? init : 0);
+    val = init > 0 ? init : 0;
     LOCKED(
         allKernelSemaphores.insertBack(this);
     )
 }
 
-KernelSemaphore::~KernelSemaphore(){} //TODO?
+KernelSemaphore::~KernelSemaphore(){    //correct?
+        LOCKED(
+            List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
+            for (;iter != allKernelSemaphores.end(); iter++){
+                if(this == (*iter)){
+                    iter.remove();
+                    break;        
+                }
+            }
+        )
+    }
 
 int KernelSemaphore::wait(Time maxTimeToWait){
-    if(maxTimeToWait < 0) return -1;
+    if(maxTimeToWait < 0) return -1;    //not defined
     int ret = 1;
     LOCKED(
         if(--val < 0){
             PCB *toBlockPCB = running;
+            semPCB *toBlockSemPCB;
             toBlockPCB->manuallyUnblocked = 0;
             if(maxTimeToWait == 0) blockedInfTime.insertBack(toBlockPCB);
             else {
-                semPCB toBlockSemPCB(toBlockPCB, maxTimeToWait);
-                insertTimePCB(&toBlockSemPCB);
+                toBlockSemPCB = new semPCB(toBlockPCB, maxTimeToWait);
+                insertTimePCB(toBlockSemPCB);
             }
             toBlockPCB->setState(PCB::BLOCKED);
             dispatch();
+            delete toBlockSemPCB;   /*semPCB is only a wrapper for PCB (to include time) so we MUST delete it (we can do that just not)*/
             ret = toBlockPCB->manuallyUnblocked;
             toBlockPCB->manuallyUnblocked = 0;
         }
@@ -35,7 +47,7 @@ int KernelSemaphore::wait(Time maxTimeToWait){
 
 int KernelSemaphore::signal(int n){
     if(n < 0) return n;
-    int incVal = (n == 0) ? 1 : n;
+    int incVal = n == 0 ? 1 : n;
     int ret = 0;
     LOCKED(
         val += incVal;
@@ -98,10 +110,10 @@ void KernelSemaphore::tickSem(){
 }
 
 void KernelSemaphore::tickAllSems(){
-    if(allKernelSemaphores.isEmpty()) return;
+    //if(allKernelSemaphores.isEmpty()) return;
+    //List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
     LOCKED(
-        List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
-        for (;iter != allKernelSemaphores.end(); iter++){
+        for (List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin(); iter != allKernelSemaphores.end(); iter++){
             if((*iter) != nullptr) (*iter)->tickSem();
         }
     )
