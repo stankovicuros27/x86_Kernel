@@ -29,6 +29,8 @@ typedef int     bool;
 
 #define nullptr 0
 
+#define IVT_SIZE 256
+
 #define loop for (int jff = 0; jff < 32000; jff++){\
                 for (int kff = 0; kff < 32000; kff++);\
             }\

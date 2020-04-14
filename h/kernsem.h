@@ -25,7 +25,7 @@ public:
     int signal(int n);
     int getVal() const { return val; }
 
-private:
+protected:
     int val;
     List<semPCB*> blockedWithTime;
     List<PCB*> blockedInfTime;
