@@ -12,9 +12,7 @@ IVTEntry::IVTEntry(IVTNo ivtNo, pInterrupt pNewIntr){
 }
 
 IVTEntry::~IVTEntry(){
-    LOCKED(
-        restoreEvent();
-    )
+    restoreEvent();
 }
 
 void IVTEntry::initializeEvent(KernelEvent *event){
@@ -27,9 +25,11 @@ void IVTEntry::initializeEvent(KernelEvent *event){
 
 void IVTEntry::restoreEvent(){
     DISABLED_INTR(
-        myEvent = nullptr;
         setvect(myNo, oldIntr);
     )
+    IVTable[myNo] = nullptr;
+    myEvent = nullptr;
+    
 }
 
 void IVTEntry::signal(){

@@ -11,5 +11,11 @@ IdlePCB::IdlePCB() : PCB(){
 volatile int IdlePCB::idleCnt = 1;
 
 void IdlePCB::idleVoid(){
-    while(idleCnt == 1) {};
+
+    while(idleCnt == 1) {
+        LOCKED(
+            cout << "Started idle! ";
+            loop
+        )
+    };
 }

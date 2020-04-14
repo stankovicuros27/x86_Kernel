@@ -1,20 +1,38 @@
 #include "kerevent.h"
+#include "ivtentry.h"
+#include "schedule.h"
 
- KernelEvent::KernelEvent(IVTNo ivtNox) : Semaphore(0){
+ KernelEvent::KernelEvent(IVTNo ivtNox){
     ivtNo = ivtNox;
     myCreator = running;
+    val = 0;
+    IVTEntry::IVTable[ivtNo]->initializeEvent(this);
  }
 
-KernelEvent::~KernelEvent(){}
+KernelEvent::~KernelEvent(){
+    IVTEntry::IVTable[ivtNo]->restoreEvent();
+}
 
 void KernelEvent::wait(){
-    if(running == myCreator){
-        Semaphore::wait(0);
-    }
+    LOCKED(
+        PCB *toBlock = running;
+        val--;
+            blockedList.insertBack(toBlock);
+            toBlock->setState(PCB::BLOCKED);
+            dispatch();
+    )
 }
 
 void KernelEvent::signal(){
-    if (Semaphore::val() < 0) {
-        Semaphore::signal(0);
-    }
+    LOCKED(
+        if(val < 0){
+            val++;
+            if(!blockedList.isEmpty()){
+                PCB *toUnblock = blockedList.getFront();
+                blockedList.deleteFront();
+                toUnblock->setState(PCB::READY);
+                Scheduler::put(toUnblock);
+            }
+        }
+    )
 }

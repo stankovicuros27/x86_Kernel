@@ -36,6 +36,7 @@ protected:
     static void tickAllSems();
 
     friend class Timer;
+    friend class KernelEvent;
 };
 
 #endif

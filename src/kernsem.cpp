@@ -47,7 +47,7 @@ int KernelSemaphore::wait(Time maxTimeToWait){
 
 int KernelSemaphore::signal(int n){
     if(n < 0) return n;
-    int incVal = n == 0 ? 1 : n;
+    int incVal = (n == 0) ? 1 : n;
     int ret = 0;
     LOCKED(
         val += incVal;
@@ -114,7 +114,7 @@ void KernelSemaphore::tickAllSems(){
     //List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
     LOCKED(
         for (List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin(); iter != allKernelSemaphores.end(); iter++){
-            if((*iter) != nullptr) (*iter)->tickSem();
+            (*iter)->tickSem();
         }
     )
 }

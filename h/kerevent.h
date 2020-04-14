@@ -5,10 +5,10 @@
 #include "locks.h"
 #include "event.h"
 #include "pcb.h"
-#include "ivtentry.h"
-#include "semaphore.h"
+#include "kernsem.h"
+#include "list.h"
 
-class KernelEvent : private Semaphore {
+class KernelEvent {
 public:
     KernelEvent(IVTNo ivtNox);
     ~KernelEvent();
@@ -18,6 +18,8 @@ public:
 private:
     IVTNo ivtNo;
     PCB *myCreator;
+    List<PCB*> blockedList;
+    int val;
 };
 
 #endif
