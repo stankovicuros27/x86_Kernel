@@ -11,36 +11,41 @@ KernelSemaphore::KernelSemaphore(int init){
 }
 
 KernelSemaphore::~KernelSemaphore(){
-    // LOCKED(
-    //     while(!blockedInfTime.isEmpty()){
-    //         PCB *toUnblock = blockedInfTime.getFront();
-    //         blockedInfTime.deleteFront();
-    //         toUnblock->unblockPCB();
-    //     }
-    //     while(!blockedWithTime.isEmpty()){
-    //         PCB *toUnblock = blockedWithTime.getFront()->myPCB;
-    //         blockedWithTime.deleteFront();
-    //         toUnblock->unblockPCB();
-    //     }
-    // )
+    LOCKED(
+        while(!blockedInfTime.isEmpty()){
+            PCB *toUnblock = blockedInfTime.getFront();
+            blockedInfTime.deleteFront();
+            toUnblock->unblockPCB();
+        }
+        while(!blockedWithTime.isEmpty()){
+            PCB *toUnblock = blockedWithTime.getFront()->myPCB;
+            blockedWithTime.deleteFront();
+            toUnblock->unblockPCB();
+        }
+    )
 }
 
 int KernelSemaphore::wait(Time maxTimeToWait){
-    //if(maxTimeToWait < 0) return -1;    //not defined
+    if(maxTimeToWait < 0) return -1;    //not defined
     int ret = 1;
     LOCKED(
         if(--val < 0){
             PCB *toBlockPCB = running;
-            semPCB *toBlockSemPCB = nullptr;
+            semPCB *toBlockSemPCB = nullptr;    /*wrapper struct*/
             toBlockPCB->manuallyUnblocked = 0;
-            if(maxTimeToWait == 0) blockedInfTime.insertBack(toBlockPCB);
+
+            if (maxTimeToWait == 0) {
+                blockedInfTime.insertBack(toBlockPCB);
+            }
             else {
                 toBlockSemPCB = new semPCB(toBlockPCB, maxTimeToWait);
                 insertTimePCB(toBlockSemPCB);
             }
+
             toBlockPCB->blockPCB();
             dispatch();
-            if(toBlockSemPCB != nullptr) delete toBlockSemPCB;   /*semPCB is only a wrapper for PCB (to include time) so we MUST delete it (we can do that just not)*/
+            if(toBlockSemPCB != nullptr) delete toBlockSemPCB;   /*we MUST delete it (we can do that just not)*/
+            
             ret = toBlockPCB->manuallyUnblocked;
             toBlockPCB->manuallyUnblocked = 0;
         }
@@ -114,7 +119,6 @@ void KernelSemaphore::tickSem(){
 
 void KernelSemaphore::tickAllSems(){
     if(allKernelSemaphores.isEmpty()) return;
-    //List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
     LOCKED(
         for (List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin(); iter != allKernelSemaphores.end(); iter++){
             (*iter)->tickSem();
