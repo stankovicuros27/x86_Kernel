@@ -39,6 +39,8 @@ public:
 
     //---util funcs---
     void startPCB();
+    void blockPCB();
+    void unblockPCB();
     void waitToComplete();
 
     static PCB* getPCBById(ID id);

@@ -10,20 +10,23 @@ KernelSemaphore::KernelSemaphore(int init){
     )
 }
 
-KernelSemaphore::~KernelSemaphore(){    //correct?
-        LOCKED(
-            List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
-            for (;iter != allKernelSemaphores.end(); iter++){
-                if(this == (*iter)){
-                    iter.remove();
-                    break;        
-                }
-            }
-        )
-    }
+KernelSemaphore::~KernelSemaphore(){
+    // LOCKED(
+    //     while(!blockedInfTime.isEmpty()){
+    //         PCB *toUnblock = blockedInfTime.getFront();
+    //         blockedInfTime.deleteFront();
+    //         toUnblock->unblockPCB();
+    //     }
+    //     while(!blockedWithTime.isEmpty()){
+    //         PCB *toUnblock = blockedWithTime.getFront()->myPCB;
+    //         blockedWithTime.deleteFront();
+    //         toUnblock->unblockPCB();
+    //     }
+    // )
+}
 
 int KernelSemaphore::wait(Time maxTimeToWait){
-    if(maxTimeToWait < 0) return -1;    //not defined
+    //if(maxTimeToWait < 0) return -1;    //not defined
     int ret = 1;
     LOCKED(
         if(--val < 0){
@@ -35,9 +38,9 @@ int KernelSemaphore::wait(Time maxTimeToWait){
                 toBlockSemPCB = new semPCB(toBlockPCB, maxTimeToWait);
                 insertTimePCB(toBlockSemPCB);
             }
-            toBlockPCB->setState(PCB::BLOCKED);
+            toBlockPCB->blockPCB();
             dispatch();
-            delete toBlockSemPCB;   /*semPCB is only a wrapper for PCB (to include time) so we MUST delete it (we can do that just not)*/
+            /*delete toBlockSemPCB;   /*semPCB is only a wrapper for PCB (to include time) so we MUST delete it (we can do that just not)*/
             ret = toBlockPCB->manuallyUnblocked;
             toBlockPCB->manuallyUnblocked = 0;
         }
@@ -63,8 +66,7 @@ void KernelSemaphore::unblockPCBs(int &n){
         while(n > 0 && !blockedInfTime.isEmpty()){
             PCB *toUnblock = blockedInfTime.getFront();
             blockedInfTime.deleteFront();
-            toUnblock->setState(PCB::READY);
-            Scheduler::put(toUnblock);
+            toUnblock->unblockPCB();
             toUnblock->manuallyUnblocked = 1;
             n--;
         }
@@ -72,9 +74,9 @@ void KernelSemaphore::unblockPCBs(int &n){
             PCB *toUnblock = blockedWithTime.getFront()->myPCB;
             Time addWaitTime = blockedWithTime.getFront()->timeToWait;
             blockedWithTime.deleteFront();
-            blockedWithTime.getFront()->timeToWait += addWaitTime;
-            toUnblock->setState(PCB::READY);
-            Scheduler::put(toUnblock);
+            if(blockedWithTime.getFront() != nullptr)
+                blockedWithTime.getFront()->timeToWait += addWaitTime;
+            toUnblock->unblockPCB();
             toUnblock->manuallyUnblocked = 1;
             n--;
         }
@@ -88,16 +90,16 @@ void KernelSemaphore::insertTimePCB(semPCB *toInsert){
                 toInsert->timeToWait -= (*iter)->timeToWait;
                 iter++;
             }
-            (*iter)->timeToWait-=toInsert->timeToWait;
+            if((*iter) != nullptr)
+                (*iter)->timeToWait-=toInsert->timeToWait;
             iter.insertBefore(toInsert);
     )
 }
 
 void KernelSemaphore::tickSem(){
-    if(blockedWithTime.isEmpty()) return;
     LOCKED(
-        if(--(blockedWithTime.getFront()->timeToWait) <= 0){
-            while(!blockedWithTime.isEmpty() && blockedWithTime.getFront()->timeToWait <= 0){
+        if(--(blockedWithTime.getFront()->timeToWait) == 0){
+            while(!blockedWithTime.isEmpty() && blockedWithTime.getFront()->timeToWait == 0){
                 PCB *toUnblock = blockedWithTime.getFront()->myPCB;
                 blockedWithTime.deleteFront();
                 toUnblock->setState(PCB::READY);

@@ -10,16 +10,24 @@
  }
 
 KernelEvent::~KernelEvent(){
-    IVTEntry::IVTable[ivtNo]->restoreEvent();
+    LOCKED(
+        /*while(!blockedList.isEmpty()){
+            PCB *toUnblock = blockedList.getFront();
+            blockedList.deleteFront();
+            toUnblock->unblockPCB();
+        }*/
+        IVTEntry::IVTable[ivtNo]->restoreEvent();
+    )
 }
 
 void KernelEvent::wait(){
+    if(running != myCreator) return;
     LOCKED(
         PCB *toBlock = running;
         val--;
-            blockedList.insertBack(toBlock);
-            toBlock->setState(PCB::BLOCKED);
-            dispatch();
+        blockedList.insertBack(toBlock);
+        toBlock->blockPCB();
+        dispatch();
     )
 }
 
@@ -30,8 +38,7 @@ void KernelEvent::signal(){
             if(!blockedList.isEmpty()){
                 PCB *toUnblock = blockedList.getFront();
                 blockedList.deleteFront();
-                toUnblock->setState(PCB::READY);
-                Scheduler::put(toUnblock);
+                toUnblock->unblockPCB();
             }
         }
     )

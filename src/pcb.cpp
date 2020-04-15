@@ -54,19 +54,36 @@ void PCB::initializeStack(pFunction fp){
 
 void PCB::startPCB(){
     LOCKED(
-        if (this != nullptr && (state == PCB::CREATED || state == PCB::BLOCKED)){
+        if (state == PCB::CREATED){
             setState(PCB::READY);
             Scheduler::put(this);
         } 
     )
 }
 
-void PCB::awakeMyAsleep(){
+void PCB::unblockPCB(){
     LOCKED(
+        if(state == PCB::BLOCKED){
+            setState(PCB::READY);
+            Scheduler::put(this);
+        }
+    )
+}
+
+void PCB::blockPCB(){
+    LOCKED(
+        if((state != PCB::TERMINATED) && (state != PCB::IDLE)){
+            setState(PCB::BLOCKED);
+        }
+    )
+}
+
+void PCB::awakeMyAsleep(){
+    LOCKED( 
         while(!waitingForMe.isEmpty()){
             PCB *toStart = waitingForMe.getFront();
             waitingForMe.deleteFront();
-            toStart->startPCB(); 
+            toStart->unblockPCB(); 
         }
     )
     //ovde sam obrisao if(toStart != nullptr) ispred toStart->
@@ -75,15 +92,14 @@ void PCB::awakeMyAsleep(){
 void PCB::waitToComplete(){
     //pazi ovde uslove!!!!!!
     LOCKED(
-        if (this != nullptr &&
-        running != this && 
+        if (running != this && 
         this->state != PCB::TERMINATED && 
         this->state != PCB::IDLE && 
         this->state != PCB::CREATED 
         /*&& !this->isWaitingForMe()*/ ) /* used for deadlocks */
         {        
-            running->state = PCB::BLOCKED;
             this->waitingForMe.insertBack(running);
+            running->blockPCB();
             dispatch();
         }
     )
