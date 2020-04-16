@@ -24,6 +24,20 @@ private:
     KernelEvent *myEvent;
 };
 
+//---------my---------
+#define PREPAREENTRY(ivtNo,callOld)                 \
+void interrupt intr##ivtNo(...);                    \
+                                                    \
+IVTEntry ivtEntry##ivtNo(ivtNo,intr##ivtNo);        \
+void interrupt intr##ivtNo(...){                    \
+	if(callOld) ivtEntry##ivtNo.oldIntr();          \
+    ivtEntry##ivtNo.signal();                       \
+    dispatch();                                     \
+}                                                   \
+//--------------------
+
+
+/*
 //-----copied-----
 #define PREPAREENTRY(ivtNo, callOld)                    \
 extern IVTEntry ivtEntry##ivtNo;                        \
@@ -36,5 +50,7 @@ void interrupt eventInterrupt##ivtNo(...) {             \
                                                         \
 IVTEntry ivtEntry##ivtNo(ivtNo, eventInterrupt##ivtNo);
 //----------------
+*/
+
 
 #endif

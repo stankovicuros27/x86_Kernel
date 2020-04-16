@@ -11,11 +11,11 @@
 
 KernelEvent::~KernelEvent(){
     LOCKED(
-        /*while(!blockedList.isEmpty()){
+        while(!blockedList.isEmpty()){
             PCB *toUnblock = blockedList.getFront();
             blockedList.deleteFront();
             toUnblock->unblockPCB();
-        }*/
+        }
         IVTEntry::IVTable[ivtNo]->restoreEvent();
     )
 }

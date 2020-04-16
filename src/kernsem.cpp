@@ -32,10 +32,10 @@ int KernelSemaphore::wait(Time maxTimeToWait){
         if(--val < 0){
             PCB *toBlockPCB = running;
             semPCB *toBlockSemPCB = nullptr;    /*wrapper struct*/
-            toBlockPCB->manuallyUnblocked = 0;
+            toBlockPCB->manuallyUnblocked = 0;  
 
             if (maxTimeToWait == 0) {
-                blockedInfTime.insertBack(toBlockPCB);
+                blockedInfTime.insertBack(toBlockPCB);  
             }
             else {
                 toBlockSemPCB = new semPCB(toBlockPCB, maxTimeToWait);
@@ -44,7 +44,7 @@ int KernelSemaphore::wait(Time maxTimeToWait){
 
             toBlockPCB->blockPCB();
             dispatch();
-            if(toBlockSemPCB != nullptr) delete toBlockSemPCB;   /*we MUST delete it (we can do that just not)*/
+            if(toBlockSemPCB != nullptr) delete toBlockSemPCB;   /*we MUST delete it (we can do that just now, or in tickSem! not both)*/
             
             ret = toBlockPCB->manuallyUnblocked;
             toBlockPCB->manuallyUnblocked = 0;
@@ -108,10 +108,9 @@ void KernelSemaphore::tickSem(){
             while(!blockedWithTime.isEmpty() && blockedWithTime.getFront()->timeToWait == 0){
                 PCB *toUnblock = blockedWithTime.getFront()->myPCB;
                 blockedWithTime.deleteFront();
-                toUnblock->setState(PCB::READY);
+                toUnblock->unblockPCB();
                 toUnblock->manuallyUnblocked = 0;
                 val++;
-                Scheduler::put(toUnblock);
             }
         }
     )

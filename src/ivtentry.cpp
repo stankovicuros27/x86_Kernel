@@ -15,12 +15,16 @@ IVTEntry::~IVTEntry(){
     restoreEvent();
 }
 
+void IVTEntry::signal(){
+    myEvent->signal();
+}
+
 void IVTEntry::initializeEvent(KernelEvent *event){
-    myEvent = event;
     DISABLED_INTR(
         oldIntr = getvect(myNo);
         setvect(myNo, newIntr);
     )
+    myEvent = event;
 }
 
 void IVTEntry::restoreEvent(){
@@ -29,9 +33,4 @@ void IVTEntry::restoreEvent(){
     )
     IVTable[myNo] = nullptr;
     myEvent = nullptr;
-    
-}
-
-void IVTEntry::signal(){
-    myEvent->signal();
 }
