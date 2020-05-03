@@ -1,0 +1,78 @@
+#include "thread.h"
+#include "locks.h"
+#include "types.h"
+#include "pcb.h"
+#include "timer.h"
+
+extern volatile bool contextSwitchOnDemand;
+
+//-----constructors & destructors-----
+Thread::Thread(StackSize stackSize, Time timeSlice) {
+    LOCKED(
+        myPCB = new PCB(stackSize, timeSlice, this, PCB::CREATED);
+    )
+}
+
+Thread::~Thread(){          //ovo treba jos nesto?
+    LOCKED(
+        this->waitToComplete();
+        delete myPCB;
+        myPCB = nullptr;
+    )
+}
+
+//-----util funcs-----
+void Thread::start(){ LOCKED(myPCB->startPCB();) }
+void Thread::waitToComplete() { LOCKED(myPCB->waitToComplete();) }
+ID Thread::getId(){ return myPCB->getId(); }
+ID Thread::getRunningId(){ return running->getId(); }
+
+Thread* Thread::getThreadById(ID id){ return PCB::getPCBById(id)->getMyThread(); }
+
+void dispatch(){
+    DISABLED_INTR(
+        contextSwitchOnDemand = true;
+        asm int timerEntry
+    )
+        //Timer::timerIntr(); u disableintr
+}
+
+//---Signals---
+
+void Thread::signal(SignalId signal){
+    if(myPCB == nullptr) return;
+    myPCB->signal(signal);
+}
+
+void Thread::registerHandler(SignalId signal, SignalHandler handler){
+    if (myPCB == nullptr) return;
+	myPCB->registerHandler(signal,handler); 
+}
+
+void Thread::unregisterAllHandlers(SignalId id){
+    if (myPCB == nullptr) return;
+	myPCB->unregisterAllHandlers(id);
+}
+
+void Thread::swap(SignalId id, SignalHandler hand1, SignalHandler hand2){
+    if (myPCB == nullptr) return;
+	myPCB->swap(id, hand1, hand2); 
+}
+
+void Thread::blockSignal(SignalId signal){
+    if (myPCB == nullptr) return;
+	myPCB->blockSignal(signal);
+}
+
+void Thread::unblockSignal(SignalId signal){
+    if (myPCB == nullptr) return;
+	myPCB->unblockSignal(signal);
+}
+
+void Thread::blockSignalGlobally(SignalId signal){
+    PCB::blockSignalGlobally(signal);
+}
+
+void Thread::unblockSignalGlobally(SignalId signal){
+    PCB::unblockSignalGlobally(signal);
+}
