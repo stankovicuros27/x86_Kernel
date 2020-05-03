@@ -42,8 +42,27 @@ public:
     void blockPCB();
     void unblockPCB();
     void waitToComplete();
-
     static PCB* getPCBById(ID id);
+
+    //---Signals---
+    void signal(SignalId signal);
+	void registerHandler(SignalId signal, SignalHandler handler);
+	void unregisterAllHandlers(SignalId id);
+	void swap(SignalId id, SignalHandler hand1, SignalHandler hand2);
+	void blockSignal(SignalId signal);
+	static void blockSignalGlobally(SignalId signal);
+	void unblockSignal(SignalId signal);
+	static void unblockSignalGlobally(SignalId signal);
+	bool handleSignals();
+	void kill(PCB *pcb);
+
+
+    bool localSignalStatus[16];
+    static bool globalSignalStatus[16];
+    List<SignalHandler> signalHandlers[16];
+    List<SignalId> activeSignals;
+    PCB *parent;
+    //---/Signals---
 
 protected: 
     StackSize stackSize;

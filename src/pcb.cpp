@@ -147,3 +147,36 @@ void PCB::runWrapper(){
         dispatch();
     )
 }
+
+//---Signals---
+
+void PCB::signal(SignalId signal){
+
+}
+void PCB::registerHandler(SignalId signal, SignalHandler handler){
+
+}
+void PCB::unregisterAllHandlers(SignalId id){
+
+}
+void PCB::swap(SignalId id, SignalHandler hand1, SignalHandler hand2){
+
+}
+void PCB::blockSignal(SignalId signal){
+
+}
+void PCB::blockSignalGlobally(SignalId signal){
+
+}
+void PCB::unblockSignal(SignalId signal){
+
+}
+void PCB::unblockSignalGlobally(SignalId signal){
+
+}
+bool PCB::handleSignals(){
+
+}
+void PCB::kill(PCB *pcb){
+
+}

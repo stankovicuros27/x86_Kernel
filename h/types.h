@@ -37,4 +37,7 @@ typedef int     bool;
 
 #define shortloop for(int fff = 0; fff < 32000; fff++);
 
+typedef void (*SignalHandler)();
+typedef unsigned SignalId;
+
 #endif
