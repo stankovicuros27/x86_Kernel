@@ -3,6 +3,7 @@
 
 #include "locks.h"
 #include "types.h"
+#include <iostream.h>
 
 template<class T> class List {
 
@@ -46,6 +47,27 @@ public:
         }
         head = tail = nullptr;
         n = 0;
+    }
+
+    void remove(Elem *elem) {
+        if(!head) return;
+        Elem *toDelete = head;
+        while(toDelete != nullptr && toDelete != elem){
+            toDelete = toDelete->next;
+        }
+        if(toDelete == nullptr) return;
+        if(head == toDelete)
+            head = head->next;
+        if(tail == toDelete)
+            tail = tail->prev;
+        if(toDelete->next != nullptr){
+            toDelete->next->prev = toDelete->prev;
+        }
+        if(toDelete->prev != nullptr){
+            toDelete->prev->next = toDelete->next;
+        } 
+        delete toDelete;
+        n--;
     }
 
     void insertBack(T data) {
@@ -100,6 +122,12 @@ public:
         delete toDelete;
     }
 
+    void printFwd() {
+		for (Elem *p = head; p!=nullptr; p=p->next)
+			cout << p->data << " ";
+		cout << endl;
+	}
+
 private: 
     int n;
     Elem* head, * tail;
@@ -141,6 +169,11 @@ public:
 				    current->prev = newelem;
 			    }
 		    }
+
+            void remove(){
+                myList->remove(current);
+                current = nullptr;
+            }
 
         private:
             Elem* current;

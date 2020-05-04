@@ -53,14 +53,14 @@ public:
 	static void blockSignalGlobally(SignalId signal);
 	void unblockSignal(SignalId signal);
 	static void unblockSignalGlobally(SignalId signal);
-	bool handleSignals();
-	void kill(PCB *pcb);
+	static bool handleSignals();
+	static void kill(PCB *pcb);
 
 
     bool localSignalStatus[16];
     static bool globalSignalStatus[16];
     List<SignalHandler> signalHandlers[16];
-    List<SignalId> activeSignals;
+    List<SignalId> mySignals;
     PCB *parent;
     //---/Signals---
 

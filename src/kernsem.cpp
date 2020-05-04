@@ -11,6 +11,10 @@ KernelSemaphore::KernelSemaphore(int init){
 }
 
 KernelSemaphore::~KernelSemaphore(){
+    /*DISABLED_INTR(
+        cout << "\nLista PCBova:::\n";
+        allPCBs.printFwd();
+    )*/
     LOCKED(
         while(!blockedInfTime.isEmpty()){
             PCB *toUnblock = blockedInfTime.getFront();
@@ -22,7 +26,20 @@ KernelSemaphore::~KernelSemaphore(){
             blockedWithTime.deleteFront();
             toUnblock->unblockPCB();
         }
+        List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
+
+        while(iter != allKernelSemaphores.end()){
+            if(*iter == this){
+                iter.remove();
+                break;
+            }
+            iter++;
+        }
     )
+    /*DISABLED_INTR(
+        cout << "\nLista PCBova posle:::\n";
+        allPCBs.printFwd();
+    )*/
 }
 
 int KernelSemaphore::wait(Time maxTimeToWait){

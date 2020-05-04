@@ -36,8 +36,27 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
 PCB::PCB(){} //used only to make idlePCB
 
 PCB::~PCB(){                        //mozda da dodam da se brise iz liste svih PCBova?
-    awakeMyAsleep();
-    if (stackSize != 0 || stack != nullptr) delete[] stack;
+    /*DISABLED_INTR(
+        cout << "\nLista PCBova:::\n";
+        allPCBs.printFwd();
+    )*/
+    LOCKED(
+        List<PCB*>::Iterator iter = allPCBs.begin();
+        while(iter != allPCBs.end()){
+            if(*iter == this){
+                iter.remove();
+                break;
+            }
+            iter++;
+        }
+        if (this != nullptr) awakeMyAsleep();
+        if (stackSize != 0 || stack != nullptr) delete[] stack;
+        stack = nullptr;
+    )
+    /*DISABLED_INTR(
+        cout << "\nLista PCBova posle:::\n";
+        allPCBs.printFwd();
+    )*/ 
 }
 
 void PCB::initializeStack(pFunction fp){
@@ -151,28 +170,28 @@ void PCB::runWrapper(){
 //---Signals---
 
 void PCB::signal(SignalId signal){
-
+    if(signal > 15) return;
 }
 void PCB::registerHandler(SignalId signal, SignalHandler handler){
-
+    if(signal > 15) return;
 }
 void PCB::unregisterAllHandlers(SignalId id){
-
+    if(id > 15) return;
 }
 void PCB::swap(SignalId id, SignalHandler hand1, SignalHandler hand2){
-
+    if(id > 15) return; 
 }
 void PCB::blockSignal(SignalId signal){
-
+    if(signal > 15) return;
 }
 void PCB::blockSignalGlobally(SignalId signal){
-
+    if(signal > 15) return;
 }
 void PCB::unblockSignal(SignalId signal){
-
+    if(signal > 15) return;
 }
 void PCB::unblockSignalGlobally(SignalId signal){
-
+    if(signal > 15) return;
 }
 bool PCB::handleSignals(){
 
