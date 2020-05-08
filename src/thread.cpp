@@ -16,8 +16,8 @@ Thread::Thread(StackSize stackSize, Time timeSlice) {
 Thread::~Thread(){          //ovo treba jos nesto?
 this->waitToComplete();
     LOCKED(
-        if(myPCB != nullptr)
-            delete myPCB;
+        /*if(myPCB != nullptr)
+            delete myPCB;*/
         myPCB = nullptr;
     )
 }
