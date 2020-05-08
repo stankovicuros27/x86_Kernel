@@ -49,23 +49,16 @@ public:
         n = 0;
     }
 
-    void remove(Elem *elem) {
-        if(!head) return;
-        Elem *toDelete = head;
-        while(toDelete != nullptr && toDelete != elem){
-            toDelete = toDelete->next;
-        }
-        if(toDelete == nullptr) return;
-        if(head == toDelete)
-            head = head->next;
-        if(tail == toDelete)
-            tail = tail->prev;
+    void remove(Elem *toDelete) {
+        if(head == nullptr || toDelete == nullptr) return;
+        if(head == toDelete) head = head->next;
+        if(tail == toDelete) tail = tail->prev;
         if(toDelete->next != nullptr){
             toDelete->next->prev = toDelete->prev;
         }
         if(toDelete->prev != nullptr){
             toDelete->prev->next = toDelete->next;
-        } 
+        }
         delete toDelete;
         n--;
     }
@@ -175,7 +168,7 @@ public:
                 current = nullptr;
             }
 
-        private:
+        public:
             Elem* current;
             List<T> *myList;
     };

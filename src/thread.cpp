@@ -24,12 +24,14 @@ this->waitToComplete();
 
 //-----util funcs-----
 void Thread::start(){ 
-    if(myPCB != nullptr)
+    if(myPCB != nullptr){
         LOCKED(myPCB->startPCB();) 
+    }
 }
 void Thread::waitToComplete() { 
-    if(myPCB != nullptr)
+    if(myPCB != nullptr){
         LOCKED(myPCB->waitToComplete();) 
+    }
 }
 ID Thread::getId(){ 
     if(myPCB != nullptr)
