@@ -1,6 +1,6 @@
 #include "idlepcb.h"
 
-IdlePCB::IdlePCB() : PCB(){
+IdlePCB::IdlePCB() : PCB() {
     setState(PCB::IDLE);
     timeSlice = 1;
     myLockVal = 0;

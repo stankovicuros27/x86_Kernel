@@ -11,18 +11,17 @@ volatile Reg tss;
 volatile Reg tsp;
 volatile Reg tbp;
 
-PCB* toKill = nullptr;
+PCB* killTarget = nullptr;
 
-void interrupt Timer::timerIntr(...){
-
-    if(contextSwitchOnDemand == false){
-        if(remainingTime > 0) remainingTime--;  
+void interrupt Timer::timerIntr(...) {
+    if (!contextSwitchOnDemand) {
+        if(remainingTime > 0) remainingTime--;
         asm int utilEntry
         tick();
         KernelSemaphore::tickAllSems();
     }
     
-    if(contextSwitchOnDemand == true || (remainingTime == 0 && lockVal == 0 && !running->getUnlimitedTime())){
+    if(contextSwitchOnDemand || (remainingTime == 0 && lockVal == 0 && !running->getUnlimitedTime())){
         asm {
             mov tss, ss
             mov tsp, sp
@@ -38,34 +37,12 @@ void interrupt Timer::timerIntr(...){
             Scheduler::put(running);
         }
 
-        toKill = nullptr;
+        killTarget = nullptr;
 
-        running = Scheduler::get();
-
-        if(running == nullptr || running->state != PCB::READY){
-            running = idlePCB;
-        } else {
-            running->state = PCB::RUNNING;
-        }
-
-        lockVal = running->myLockVal;
-        remainingTime = running->timeSlice;
-        tss = running->ss;
-        tsp = running->sp;
-        tbp = running->bp;
-        asm {
-            mov ss, tss
-            mov sp, tsp
-            mov bp, tbp
-        }
-
-        PCB::handleSignals();
-
-        while (running->toKill) {
-            toKill = running;
+        while (true) {
             running = Scheduler::get();
 
-            if(running == nullptr || running->state != PCB::READY){
+            if (running == nullptr || running->state != PCB::READY){
                 running = idlePCB;
             } else {
                 running->state = PCB::RUNNING;
@@ -82,13 +59,21 @@ void interrupt Timer::timerIntr(...){
                 mov bp, tbp
             }
 
+            // if (!contextSwitchOnDemand) {
             PCB::handleSignals();
-
-            PCB::kill(toKill);
-            toKill = nullptr;
-            if (running == idlePCB) break;
+            if (killTarget != nullptr) {
+                PCB::kill(killTarget);
+            }
+            if (running->toKill) {
+                killTarget = running;
+                killTarget->state = PCB::READY;
+                continue;
+            }
+            // }
+            break;
         }
     }
+
     contextSwitchOnDemand = false;
 }
 

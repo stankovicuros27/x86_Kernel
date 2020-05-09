@@ -55,7 +55,6 @@ public:
 	static void unblockSignalGlobally(SignalId signal);
 	static void handleSignals();
 	static void kill(PCB *pcb);
-    void changeChildsParents();
 
 
     bool localSignalStatus[16];
@@ -92,8 +91,8 @@ protected:
 private:  
     void awakeMyAsleep();
     bool isWaitingForMe();
-    void waitAll();
-    
+    void killCleanup();
+
     friend class Timer;
     friend class Thread;
     friend class System;

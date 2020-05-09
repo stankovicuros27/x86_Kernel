@@ -15,10 +15,12 @@ public:
     void wait();
     void signal();
 
+    friend class PCB;
+
 private:
     IVTNo ivtNo;
     PCB *myCreator;
-    
+
     List<PCB*> blockedList;
     int val;
 };

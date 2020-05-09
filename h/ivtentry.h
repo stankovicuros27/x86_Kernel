@@ -5,8 +5,7 @@
 #include "types.h"
 #include "locks.h"
 
-class IVTEntry {
-public:
+struct IVTEntry {
     pInterrupt oldIntr;
     pInterrupt newIntr;
 
@@ -19,7 +18,6 @@ public:
     void restoreEvent();
     void signal();
 
-private:
     IVTNo myNo;
     KernelEvent *myEvent;
 };

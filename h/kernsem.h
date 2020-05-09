@@ -25,6 +25,10 @@ public:
     int signal(int n);
     int getVal() const { return val; }
 
+    friend class Timer;
+    friend class KernelEvent;
+    friend class PCB;
+
 protected:
     int val;
     List<semPCB*> blockedWithTime;
@@ -34,9 +38,6 @@ protected:
     void unblockPCBs(int &n);
     void tickSem();
     static void tickAllSems();
-
-    friend class Timer;
-    friend class KernelEvent;
 };
 
 #endif

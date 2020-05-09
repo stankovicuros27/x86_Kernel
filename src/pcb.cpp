@@ -1,4 +1,7 @@
 #include "pcb.h"
+#include "kernsem.h"
+#include "kerevent.h"
+#include "ivtentry.h"
 #include "SCHEDULE.H"
 #include <dos.h>
 #include <iostream.h>
@@ -42,8 +45,9 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
 
     LOCKED(
         parent = nullptr;
-        for(int i = 0; i < 16; i++){
-            localSignalStatus[i] = 1;
+        localSignalStatus[0] = false;
+        for (int i = 1; i < 16; i++) {
+            localSignalStatus[i] = true;
         }
         allPCBs.insertBack(this);
     )
@@ -51,8 +55,8 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
 
 PCB::PCB(){ //used only to make idlePCB
     parent = nullptr;
-    for(int i = 0; i < 16; i++){
-        localSignalStatus[i] = 1;
+    for (int i = 0; i < 16; i++) {
+        localSignalStatus[i] = false;
     }
     toKill = 0;
 } 
@@ -154,16 +158,6 @@ bool PCB::isWaitingForMe(){
     return ret;
 }
 
-void PCB::waitAll(){
-    if(running != mainPCB) return;  //only mainPCB can wait for all other threads
-    LOCKED(
-        List<PCB*>::Iterator iter = allPCBs.begin();
-        for(;iter != allPCBs.end(); iter++){
-            (*iter)->waitToComplete();
-        }
-    )
-}
-
 PCB* PCB::getPCBById(ID id){
     List<PCB*>::Iterator iter = allPCBs.begin();
     for(;iter != allPCBs.end(); iter++){
@@ -239,46 +233,81 @@ void PCB::unblockSignalGlobally(SignalId signal){
 }
 void PCB::handleSignals(){
     if (running == nullptr) return;
-    PCB *pcb = (PCB*)running;
-    List<SignalId>::Iterator it = pcb->mySignals.begin();
-    while (it != pcb->mySignals.end()) {
-		SignalId id = *it;
-		if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
-			if (id == 0){
-                pcb->toKill = 1;
-                return;
-            }
-			List<SignalHandler>::Iterator handit = (pcb->signalHandlers)[id].begin();
-			while (handit != pcb->signalHandlers[id].end()) {
-				(*handit)();
-				handit++;
-			}
-			List<SignalId>::Elem *toDelete = it.current;
-            it++;
-            pcb->mySignals.remove(toDelete);
-		}
-        else {
-            it++;
-        }
-	}
-}
-void PCB::kill(PCB *toKill){
-    /*if(toKill == nullptr) return;
-    toKill->myThread->myPCB=nullptr;
-	toKill->awakeMyAsleep();
-    toKill->changeChildsParents();
-    //delete toKill;
-    //toKill = nullptr;*/
-}
-void PCB::changeChildsParents(){
-    if(this == nullptr) return;
     LOCKED(
-        List<PCB*>::Iterator iter = allPCBs.begin();
-        while(iter != allPCBs.end()){
-            if(*iter && (*iter)->parent == this){
-                (*iter)->parent = nullptr;
+        PCB *pcb = (PCB*)running;
+        List<SignalId>::Iterator it = pcb->mySignals.begin();
+        while (it != pcb->mySignals.end()) {
+            SignalId id = *it;
+            if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
+                if (id == 0){
+                    pcb->toKill = 1;
+                    it++;
+                    continue;
+                }
+                for (List<SignalHandler>::Iterator handit = pcb->signalHandlers[id].begin();
+                        handit != pcb->signalHandlers[id].end(); handit++)
+                {
+                    (*handit)();
+                }
+                List<SignalId>::Elem *toDelete = it.current;
+                it++;
+                pcb->mySignals.remove(toDelete);
+            } else {
+                it++;
             }
-            iter++;
         }
     )
+}
+
+void PCB::kill(PCB *killTarget){
+    if (killTarget == nullptr) return;
+    LOCKED(
+        if (killTarget->parent != nullptr) killTarget->parent->myThread->signal(1);
+        killTarget->myThread->myPCB = nullptr;
+        killTarget->awakeMyAsleep();
+        killTarget->killCleanup();
+        delete killTarget;
+        killTarget = nullptr;
+    )
+}
+
+void PCB::killCleanup() {
+    // Remove references to this PCB in other PCBs
+    for (List<PCB*>::Iterator it_pcb = allPCBs.begin(); it_pcb != allPCBs.end(); it_pcb++) {
+        if (*it_pcb) {  // TODO: Remove PCBs from list upon deletion
+            PCB*& pcb = *it_pcb;
+            if (pcb->parent == this) pcb->parent = nullptr;
+
+            for (List<PCB*>::Iterator it = pcb->waitingForMe.begin(); it != pcb->waitingForMe.end(); it++) {
+                PCB*& waitingPCB = *it;
+                if (waitingPCB == this) waitingPCB = nullptr;
+            }
+        }
+    }
+
+    // Remove references to this PCB in semaphores
+    for (List<KernelSemaphore*>::Iterator it_sem = allKernelSemaphores.begin(); it_sem != allKernelSemaphores.end(); it_sem++) {
+        if (*it_sem) {  // TODO: Remove semaphores from list upon deletion
+            KernelSemaphore* sem = *it_sem;
+            for (List<PCB*>::Iterator it1 = sem->blockedInfTime.begin(); it1 != sem->blockedInfTime.end(); it1++) {
+                PCB*& pcb = *it1;
+                if (pcb == this) pcb = nullptr;
+            }
+            for (List<KernelSemaphore::semPCB*>::Iterator it2 = sem->blockedWithTime.begin();
+                    it2 != sem->blockedWithTime.end(); it2++) {
+                PCB*& pcb = (*it2)->myPCB;
+                if (pcb == this) pcb = nullptr;
+            }
+        }
+    }
+
+    // Remove references to this PCB in events
+    for (int i = 0; i < IVT_SIZE; i++) {
+        KernelEvent* evt = IVTEntry::IVTable[i]->myEvent;
+        if (evt == nullptr) continue;
+        for (List<PCB*>::Iterator it = evt->blockedList.begin(); it != evt->blockedList.end(); it++) {
+            PCB*& pcb = *it;
+            if (pcb == this) pcb = nullptr;
+        }
+    }
 }
