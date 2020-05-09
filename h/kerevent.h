@@ -18,6 +18,7 @@ public:
 private:
     IVTNo ivtNo;
     PCB *myCreator;
+    
     List<PCB*> blockedList;
     int val;
 };

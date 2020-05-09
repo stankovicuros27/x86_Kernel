@@ -18,8 +18,8 @@ void System::restoreSystem(){
     Timer::restoreTimerIntr();
     delete mainPCB;
     delete idlePCB;
+    deleteSemaphores();
     //deletePCBs();
-    //deleteSemaphores();
 }
 
 void System::deletePCBs(){

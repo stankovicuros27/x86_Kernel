@@ -61,6 +61,14 @@ PCB::~PCB(){
     LOCKED(
         if (stack != nullptr) delete[] stack;
         stack = nullptr;
+        List<PCB*>::Iterator iter = allPCBs.begin();
+        while(iter != allPCBs.end()){
+            if(*iter == this){
+                allPCBs.remove(iter.current);
+                break;
+            }
+            iter++;
+        }
     )
 }
 
@@ -255,10 +263,12 @@ void PCB::handleSignals(){
 	}
 }
 void PCB::kill(PCB *toKill){
-    if(toKill == nullptr) return;
+    /*if(toKill == nullptr) return;
     toKill->myThread->myPCB=nullptr;
 	toKill->awakeMyAsleep();
     toKill->changeChildsParents();
+    //delete toKill;
+    //toKill = nullptr;*/
 }
 void PCB::changeChildsParents(){
     if(this == nullptr) return;
