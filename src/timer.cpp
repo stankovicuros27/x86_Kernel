@@ -11,7 +11,7 @@ volatile Reg tss;
 volatile Reg tsp;
 volatile Reg tbp;
 
-PCB* toDelete;
+PCB* toKill = nullptr;
 
 void interrupt Timer::timerIntr(...){
 
@@ -38,8 +38,31 @@ void interrupt Timer::timerIntr(...){
             Scheduler::put(running);
         }
 
-        toDelete = nullptr;
-        do {
+        toKill = nullptr;
+
+        running = Scheduler::get();
+
+        if(running == nullptr || running->state != PCB::READY){
+            running = idlePCB;
+        } else {
+            running->state = PCB::RUNNING;
+        }
+
+        lockVal = running->myLockVal;
+        remainingTime = running->timeSlice;
+        tss = running->ss;
+        tsp = running->sp;
+        tbp = running->bp;
+        asm {
+            mov ss, tss
+            mov sp, tsp
+            mov bp, tbp
+        }
+
+        PCB::handleSignals();
+
+        while (running->toKill) {
+            toKill = running;
             running = Scheduler::get();
 
             if(running == nullptr || running->state != PCB::READY){
@@ -59,17 +82,12 @@ void interrupt Timer::timerIntr(...){
                 mov bp, tbp
             }
 
-            if (toDelete != nullptr) {
-                PCB::kill(toDelete);
-                toDelete = nullptr;
-            }
+            PCB::handleSignals();
 
+            PCB::kill(toKill);
+            toKill = nullptr;
             if (running == idlePCB) break;
-            if (PCB::handleSignals())
-                toDelete = (PCB*)running;
-
-
-        } while (toDelete!=nullptr);
+        }
     }
     contextSwitchOnDemand = false;
 }

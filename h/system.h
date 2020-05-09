@@ -16,6 +16,9 @@ class System {
 public:
     static void initializeSystem();     
     static void restoreSystem();     
+private:
+    static void deletePCBs();
+    static void deleteSemaphores();
 };
 
 #endif

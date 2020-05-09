@@ -1,4 +1,6 @@
 #include "system.h"
+#include "pcb.h"
+#include "kernsem.h"
 
 PCB *mainPCB = nullptr;
 PCB *running = nullptr;
@@ -16,7 +18,24 @@ void System::restoreSystem(){
     Timer::restoreTimerIntr();
     delete mainPCB;
     delete idlePCB;
+    //deletePCBs();
+    //deleteSemaphores();
 }
 
+void System::deletePCBs(){
+    List<PCB*>::Iterator iter = allPCBs.begin();
+    while(iter != allPCBs.end()){
+        if(*iter) delete (*iter);
+        iter++;
+    }
+}
+
+void System::deleteSemaphores(){
+    List<KernelSemaphore*>::Iterator iter = allKernelSemaphores.begin();
+    while(iter != allKernelSemaphores.end()){
+        if(*iter) delete (*iter);
+        iter++;
+    }
+}
 
 

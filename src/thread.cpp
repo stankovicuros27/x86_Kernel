@@ -13,7 +13,7 @@ Thread::Thread(StackSize stackSize, Time timeSlice) {
     )
 }
 
-Thread::~Thread(){          //ovo treba jos nesto?
+Thread::~Thread(){
 this->waitToComplete();
     LOCKED(
         /*if(myPCB != nullptr)
@@ -51,7 +51,6 @@ void dispatch(){
         contextSwitchOnDemand = true;
         asm int timerEntry
     )
-        //Timer::timerIntr(); u disableintr
 }
 
 //---Signals---

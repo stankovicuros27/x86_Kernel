@@ -12,6 +12,7 @@ PCB::PCB(StackSize size, Time timeSl, Thread *myThr, State s){
     myLockVal = 0;    
     myID = ++currentID;
     state = s; 
+    toKill = 0;
    
     if (size > MAX_STACK) size = MAX_STACK; 
     if (size < MIN_STACK) size = MIN_STACK;
@@ -37,6 +38,8 @@ PCB::PCB(int mainPCB){  //used only for creating mainPCB
     timeSlice = defaultTimeSlice;
     myLockVal = 0;
     myID = ++currentID;
+    toKill = 0;
+
     LOCKED(
         parent = nullptr;
         for(int i = 0; i < 16; i++){
@@ -51,9 +54,10 @@ PCB::PCB(){ //used only to make idlePCB
     for(int i = 0; i < 16; i++){
         localSignalStatus[i] = 1;
     }
+    toKill = 0;
 } 
 
-PCB::~PCB(){                        //mozda da dodam da se brise iz liste svih PCBova?
+PCB::~PCB(){
     LOCKED(
         if (stack != nullptr) delete[] stack;
         stack = nullptr;
@@ -104,10 +108,10 @@ void PCB::awakeMyAsleep(){
         while(!waitingForMe.isEmpty()){
             PCB *toStart = waitingForMe.getFront();
             waitingForMe.deleteFront();
-            toStart->unblockPCB(); 
+            if (toStart != nullptr) toStart->unblockPCB(); 
         }
     )
-    //ovde sam obrisao if(toStart != nullptr) ispred toStart->
+    //ovde sam dodao if(toStart != nullptr) ispred toStart->
 }
 
 void PCB::waitToComplete(){
@@ -143,7 +147,6 @@ bool PCB::isWaitingForMe(){
 }
 
 void PCB::waitAll(){
-    //pazi ovde uslove!!!!!!
     if(running != mainPCB) return;  //only mainPCB can wait for all other threads
     LOCKED(
         List<PCB*>::Iterator iter = allPCBs.begin();
@@ -226,17 +229,21 @@ void PCB::unblockSignalGlobally(SignalId signal){
         globalSignalStatus[signal] = true;
     )
 }
-bool PCB::handleSignals(){
+void PCB::handleSignals(){
+    if (running == nullptr) return;
     PCB *pcb = (PCB*)running;
-    for (List<SignalId>::Iterator it = pcb->mySignals.begin(); it != pcb->mySignals.end();) {
+    List<SignalId>::Iterator it = pcb->mySignals.begin();
+    while (it != pcb->mySignals.end()) {
 		SignalId id = *it;
 		if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
-			if (id == 0) 
-				return true; // kill thread
+			if (id == 0){
+                pcb->toKill = 1;
+                return;
+            }
 			List<SignalHandler>::Iterator handit = (pcb->signalHandlers)[id].begin();
 			while (handit != pcb->signalHandlers[id].end()) {
 				(*handit)();
-				++handit;
+				handit++;
 			}
 			List<SignalId>::Elem *toDelete = it.current;
             it++;
@@ -246,9 +253,22 @@ bool PCB::handleSignals(){
             it++;
         }
 	}
-	return false;
 }
-void PCB::kill(PCB *pcb){
-    pcb->myThread->myPCB=nullptr;
-	pcb->awakeMyAsleep();
+void PCB::kill(PCB *toKill){
+    if(toKill == nullptr) return;
+    toKill->myThread->myPCB=nullptr;
+	toKill->awakeMyAsleep();
+    toKill->changeChildsParents();
+}
+void PCB::changeChildsParents(){
+    if(this == nullptr) return;
+    LOCKED(
+        List<PCB*>::Iterator iter = allPCBs.begin();
+        while(iter != allPCBs.end()){
+            if(*iter && (*iter)->parent == this){
+                (*iter)->parent = nullptr;
+            }
+            iter++;
+        }
+    )
 }
