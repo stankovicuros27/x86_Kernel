@@ -130,20 +130,27 @@ private:
 public:
     class Iterator {
         public:
-            Iterator(List<T>* myList, Elem* current) : myList(myList), current(current){}
+            Iterator(List<T>* myList, Elem* current) : myList(myList), current(current){
+                if (current) next = current->next;
+                else next = nullptr;
+            }
 
             bool operator!=(const Iterator iter) {
                 return current != iter.current;
             }
 
             Iterator& operator++() {
-                current = current->next;
+                current = next;
+                if (current) next = current->next;
+                else next = nullptr;
                 return *this;
             }
 
             Iterator operator++(int) {
                 Iterator old(*this);
-                current = current->next;
+                current = next;
+                if (current) next = current->next;
+                else next = nullptr;
                 return old;
             }
 
@@ -171,6 +178,7 @@ public:
 
         public:
             Elem* current;
+            Elem* next;
             List<T> *myList;
     };
 };

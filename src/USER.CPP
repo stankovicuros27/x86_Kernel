@@ -202,15 +202,15 @@ int userMain (int argc, char* argv[])
 #endif
 
 	for (i=0; i<N; i++){
-		syncPrintf("\nBrisem pro %d thread\n", i);
+		//syncPrintf("\nBrisem pro %d\n", i);
 		delete pro[i];
 	}  
 	delete [] pro;
-	syncPrintf("\nBrisem kev \n");
+	//syncPrintf("\nBrisem kev \n");
 	delete kev;
-	syncPrintf("\nBrisem con \n");
+	//syncPrintf("\nBrisem con \n");
 	delete con;
-	syncPrintf("\nBrisem buffer \n");
+	//syncPrintf("\nBrisem buffer \n");
 	delete buff;
 
 	intLock

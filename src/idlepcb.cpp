@@ -8,10 +8,12 @@ IdlePCB::IdlePCB() : PCB() {
     initializeStack(idleVoid);
 }
 
+int syncPrintf(const char *format, ...);
+
 volatile int IdlePCB::idleCnt = 1;
 
 void IdlePCB::idleVoid(){
     while(idleCnt == 1) {
-        dispatch();
+        
     }
 }

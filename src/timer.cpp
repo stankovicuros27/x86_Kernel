@@ -64,6 +64,7 @@ void interrupt Timer::timerIntr(...) {
             if (killTarget != nullptr) {
                 PCB::kill(killTarget);
             }
+
             if (running->toKill) {
                 killTarget = running;
                 killTarget->state = PCB::READY;

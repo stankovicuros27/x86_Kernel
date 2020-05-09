@@ -22,6 +22,13 @@ KernelSemaphore::~KernelSemaphore(){
             blockedWithTime.deleteFront();
             toUnblock->unblockPCB();
         }
+        for(List<KernelSemaphore*>::Iterator it = allKernelSemaphores.begin();
+            it != allKernelSemaphores.end(); it++){
+                if((*it) == this){
+                    it.remove();
+                    break;
+                }
+            }
     )
 }
 
