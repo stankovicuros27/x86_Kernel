@@ -263,6 +263,11 @@ void PCB::kill(PCB *killTarget){
         killTarget->myThread->myPCB = nullptr;
         killTarget->awakeMyAsleep();
         killTarget->killCleanup();
+
+        /**/
+        killTarget->freeSpace();
+        /**/
+        
         /*delete killTarget;*/
         killTarget = nullptr;
     )
@@ -273,7 +278,6 @@ void PCB::killCleanup() {
     for (List<PCB*>::Iterator it_pcb = allPCBs.begin(); it_pcb != allPCBs.end(); it_pcb++) {
         if (*it_pcb) {  // TODO: Remove PCBs from list upon deletion
             PCB*& pcb = *it_pcb;
-            // syncPrintf("\nPromenio parent na PCBu %d\n", pcb->myID);
             if (pcb->parent == this) pcb->parent = nullptr;
 
             for (List<PCB*>::Iterator it = pcb->waitingForMe.begin(); it != pcb->waitingForMe.end(); it++) {
@@ -308,4 +312,10 @@ void PCB::killCleanup() {
             if (pcb == this) it.remove();
         }
     }
+}
+
+void PCB::freeSpace(){
+    if(this == nullptr) return;
+    if(stack != nullptr) delete[] stack;
+    stack = nullptr;
 }

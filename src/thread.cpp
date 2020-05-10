@@ -18,6 +18,14 @@ this->waitToComplete();
     LOCKED(
         /*if(myPCB != nullptr)
             delete myPCB;*/
+
+        /**/
+        if(myPCB != nullptr){
+            myPCB->killCleanup();
+            myPCB->freeSpace();
+        }
+        /**/
+        
         myPCB = nullptr;
     )
 }

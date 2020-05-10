@@ -15,12 +15,12 @@ KernelSemaphore::~KernelSemaphore(){
         while(!blockedInfTime.isEmpty()){
             PCB *toUnblock = blockedInfTime.getFront();
             blockedInfTime.deleteFront();
-            toUnblock->unblockPCB();
+            if (toUnblock != nullptr) toUnblock->unblockPCB();
         }
         while(!blockedWithTime.isEmpty()){
             PCB *toUnblock = blockedWithTime.getFront()->myPCB;
             blockedWithTime.deleteFront();
-            toUnblock->unblockPCB();
+            if (toUnblock != nullptr) toUnblock->unblockPCB();
         }
         for(List<KernelSemaphore*>::Iterator it = allKernelSemaphores.begin();
             it != allKernelSemaphores.end(); it++){
@@ -78,8 +78,8 @@ void KernelSemaphore::unblockPCBs(int &n){
         while(n > 0 && !blockedInfTime.isEmpty()){
             PCB *toUnblock = blockedInfTime.getFront();
             blockedInfTime.deleteFront();
-            toUnblock->unblockPCB();
-            toUnblock->manuallyUnblocked = 1;
+            if (toUnblock != nullptr) toUnblock->unblockPCB();
+            if (toUnblock != nullptr) toUnblock->manuallyUnblocked = 1;
             n--;
         }
         while(n > 0 && !blockedWithTime.isEmpty()){
@@ -88,8 +88,8 @@ void KernelSemaphore::unblockPCBs(int &n){
             blockedWithTime.deleteFront();
             if(blockedWithTime.getFront() != nullptr)
                 blockedWithTime.getFront()->timeToWait += addWaitTime;
-            toUnblock->unblockPCB();
-            toUnblock->manuallyUnblocked = 1;
+            if (toUnblock != nullptr) toUnblock->unblockPCB();
+            if (toUnblock != nullptr) toUnblock->manuallyUnblocked = 1;
             n--;
         }
     )

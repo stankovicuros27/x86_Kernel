@@ -92,6 +92,7 @@ private:
     void awakeMyAsleep();
     bool isWaitingForMe();
     void killCleanup();
+    void freeSpace();
 
     friend class Timer;
     friend class Thread;
