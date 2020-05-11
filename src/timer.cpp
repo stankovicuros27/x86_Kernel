@@ -59,7 +59,6 @@ void interrupt Timer::timerIntr(...) {
                 mov bp, tbp
             }
 
-            // if (!contextSwitchOnDemand) {
             PCB::handleSignals();
             if (killTarget != nullptr) {
                 PCB::kill(killTarget);
@@ -70,7 +69,6 @@ void interrupt Timer::timerIntr(...) {
                 killTarget->state = PCB::READY;
                 continue;
             }
-            // }
             break;
         }
     }

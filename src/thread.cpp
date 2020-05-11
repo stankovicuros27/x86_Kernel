@@ -16,16 +16,17 @@ Thread::Thread(StackSize stackSize, Time timeSlice) {
 Thread::~Thread(){
 this->waitToComplete();
     LOCKED(
-        /*if(myPCB != nullptr)
-            delete myPCB;*/
+        /*This may crash, switch to killCleanup & freeSpace if needed
+        if(myPCB != nullptr)
+            delete myPCB;
+        */
 
-        /**/
+        /*Instead of delete -> freeSpace & killCleanup*/
         if(myPCB != nullptr){
             myPCB->killCleanup();
             myPCB->freeSpace();
         }
-        /**/
-        
+
         myPCB = nullptr;
     )
 }
