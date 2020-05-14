@@ -1,5 +1,5 @@
 ## x86 Kernel
-##### x86 architecture preemptive multitasking kernel 
+### x86 architecture preemptive multitasking kernel 
 - Threads with time sharing
 - Semaphores 
 - Events and interrupts
