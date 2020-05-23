@@ -128,6 +128,8 @@ public:
                 else next = nullptr;
             }
 
+            Iterator() : myList(nullptr), current(nullptr), next(nullptr) {}
+
             bool operator!=(const Iterator iter) {
                 return current != iter.current;
             }

@@ -204,7 +204,21 @@ void PCB::unregisterAllHandlers(SignalId id){
 }
 void PCB::swap(SignalId id, SignalHandler hand1, SignalHandler hand2){
     if(id > 15) return; 
-    //TODO
+    // This is added!
+    LOCK
+        List<SignalHandler>::Iterator iter = signalHandlers[id].begin();
+        List<SignalHandler>::Iterator it1, it2;
+        while(iter != signalHandlers[id].end()){
+            if (*iter != nullptr && *iter == hand1) it1 = iter;
+            if (*iter != nullptr && *iter == hand2) it2 = iter;
+            iter++;
+        }
+        if (*it1 != nullptr && *it2 != nullptr){
+            SignalHandler temp = *it1;
+            *it1 = *it2;
+            *it2 = temp;
+        }
+    UNLOCK
 }
 
 bool PCB::globalSignalStatus[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};

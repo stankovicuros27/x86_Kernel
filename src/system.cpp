@@ -16,6 +16,6 @@ void System::initializeSystem(){
 void System::restoreSystem(){
     //mainPCB->waitAll();
     Timer::restoreTimerIntr();
-    delete mainPCB;
-    delete idlePCB;
+    delete mainPCB; //maybe not?
+    delete idlePCB; //maybe not?
 }
