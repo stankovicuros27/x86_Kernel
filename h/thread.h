@@ -42,7 +42,7 @@ protected:
     Thread (StackSize stackSize = defaultStackSize, Time timeSlice = defaultTimeSlice);
     virtual void run(){}
 
-private:
+protected:
     PCB* myPCB;
 };
 

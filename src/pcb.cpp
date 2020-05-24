@@ -187,7 +187,12 @@ void PCB::runWrapper(){
 void PCB::signal(SignalId signal){
     if(signal > 15) return;
     LOCKED(
-        mySignals.insertBack(signal);
+        /*ADDED*/
+        /*if(parent != nullptr && signal > 2 && toSendSignal) parent->signal(signal);*/
+        if(signal < 3) mySignals.insertBack(signal);
+        else if (signal < 6) priorityHigh.insertBack(signal);
+        else if (signal < 9) priorityMid.insertBack(signal);
+        else priorityLow.insertBack(signal);
     )
 }
 void PCB::registerHandler(SignalId signal, SignalHandler handler){
@@ -251,7 +256,63 @@ void PCB::handleSignals(){
     if (running == nullptr) return;
     LOCKED(
         PCB *pcb = (PCB*)running;
+
+        /*Main signals*/
         for (List<SignalId>::Iterator it = pcb->mySignals.begin(); it != pcb->mySignals.end(); it++) {
+            SignalId id = *it;
+            if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
+                if (id == 0){
+                    pcb->toKill = 1;
+                    /*it++;*/
+                    continue;
+                }
+                for (List<SignalHandler>::Iterator it2 = pcb->signalHandlers[id].begin();
+                        it2 != pcb->signalHandlers[id].end(); it2++)
+                {
+                    (*it2)();
+                }
+                it.remove();
+            }
+        }
+
+        /*High Priority Signals*/
+        for (it = pcb->priorityHigh.begin(); it != pcb->priorityHigh.end(); it++) {
+            SignalId id = *it;
+            if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
+                if (id == 0){
+                    pcb->toKill = 1;
+                    /*it++;*/
+                    continue;
+                }
+                for (List<SignalHandler>::Iterator it2 = pcb->signalHandlers[id].begin();
+                        it2 != pcb->signalHandlers[id].end(); it2++)
+                {
+                    (*it2)();
+                }
+                it.remove();
+            }
+        }
+
+        /*Mid Priority Signals*/
+        for (it = pcb->priorityMid.begin(); it != pcb->priorityMid.end(); it++) {
+            SignalId id = *it;
+            if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
+                if (id == 0){
+                    pcb->toKill = 1;
+                    /*it++;*/
+                    continue;
+                }
+                for (List<SignalHandler>::Iterator it2 = pcb->signalHandlers[id].begin();
+                        it2 != pcb->signalHandlers[id].end(); it2++)
+                {
+                    (*it2)();
+                }
+                it.remove();
+            }
+        }
+
+        /*Low Priority Signals*/
+        for (it = pcb->priorityLow.begin(); it != pcb->priorityLow.end(); it++) {
             SignalId id = *it;
             if (pcb->localSignalStatus[id] && globalSignalStatus[id]) {
                 if (id == 0){

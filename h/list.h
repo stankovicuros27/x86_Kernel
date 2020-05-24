@@ -115,6 +115,13 @@ public:
         delete toDelete;
     }
 
+    
+	void printFwd() {
+		for (Elem *p = head; p!=nullptr; p=p->next)
+			cout << p->data << " ";
+		cout << endl;
+	}
+
 private: 
     int n;
     Elem* head, * tail;

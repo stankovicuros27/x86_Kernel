@@ -61,9 +61,15 @@ public:
     static bool globalSignalStatus[16];
     List<SignalHandler> signalHandlers[16];
     List<SignalId> mySignals;
+    List<SignalId> priorityHigh;
+    List<SignalId> priorityMid;
+    List<SignalId> priorityLow;
     PCB *parent;
     bool toKill;
     //---/Signals---
+
+    //Mod
+    bool toSendSignal;
 
 protected: 
     StackSize stackSize;

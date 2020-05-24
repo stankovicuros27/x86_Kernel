@@ -135,7 +135,7 @@ void signal1() {
 
 int syncPrintf(const char *format, ...);
 
-int userMain (int argc, char* argv[])
+int userMain1 (int argc, char* argv[])
 {
 	BoundedBuffer *buff;
 	Consumer *con;
